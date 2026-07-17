@@ -303,6 +303,21 @@ export class GameEngine {
     this.onSave?.(this.getSaveData())
   }
 
+  // ── Debug ──────────────────────────────────────────────────────────────
+
+  debugAnim(name: AnimName): void {
+    this.anim.set(name)
+  }
+
+  async debugStage(stage: number): Promise<void> {
+    const maxStage = (await import('./config')).CHARACTER_CONFIGS[this.characterType].stages.length - 1
+    const s = Math.max(0, Math.min(stage, maxStage))
+    await this.images.loadStage(this.characterType, s)
+    this.state.stage = s
+    this.stats.age = s === 0 ? 0 : ((await import('./config')).CHARACTER_CONFIGS[this.characterType].evolutionDay ?? 7)
+    this.anim.set('idle')
+  }
+
   private _restart(): void {
     this.stats = { hunger: 4, happiness: 4, age: 0, weight: 10, sick: false, poop_count: 0, alive: true }
     const now = Date.now() / 1000

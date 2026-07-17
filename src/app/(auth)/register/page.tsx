@@ -4,11 +4,15 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
+import { useLang } from '@/hooks/useLang'
+import { setLang } from '@/lib/lang'
+import type { Lang } from '@/lib/lang'
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { lang, t } = useLang()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
@@ -62,7 +66,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: 444 }}>
+    <div style={{ width: '100%', maxWidth: 444, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* 언어 토글 */}
+      <div style={{ alignSelf: 'flex-end', display: 'flex', gap: 4, fontSize: 11, marginBottom: 6 }}>
+        {(['ko', 'en'] as Lang[]).map(l => (
+          <button key={l} onClick={() => setLang(l)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+            color: lang === l ? '#9ca3af' : '#4b5563',
+            fontWeight: lang === l ? 700 : 400,
+          }}>{l.toUpperCase()}</button>
+        ))}
+      </div>
       <div style={{ position: 'relative', width: '100%' }}>
 
         {/* 스크린 안 배경 — background.png (하늘+구름) */}
@@ -124,7 +138,7 @@ export default function RegisterPage() {
             style={inputStyle}
             value={username}
             onChange={e => setUsername(e.target.value)}
-            placeholder="Username (a-z, 0-9, _)"
+            placeholder="Username"
             autoComplete="username"
             required
           />
@@ -136,7 +150,7 @@ export default function RegisterPage() {
             style={{ ...inputStyle, letterSpacing: 2 }}
             value={password}
             onChange={e => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="Password (6 digits)"
+            placeholder="Password"
             autoComplete="new-password"
             required
           />
@@ -148,7 +162,7 @@ export default function RegisterPage() {
             style={{ ...inputStyle, letterSpacing: 2 }}
             value={confirm}
             onChange={e => setConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="Confirm password"
+            placeholder="Confirm"
             autoComplete="new-password"
             required
           />
@@ -214,19 +228,32 @@ export default function RegisterPage() {
         />
       </div>
 
-      {/* 비밀번호 안내 + 개인정보 */}
+      {/* 조건 + 개인정보 박스 */}
       <div style={{
         marginTop: 10,
-        padding: '0 12px',
-        textAlign: 'center',
+        width: '100%',
+        padding: '8px 12px',
+        background: 'rgba(0,0,0,0.35)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 4,
+        boxSizing: 'border-box',
         fontFamily: 'Galmuri9, sans-serif',
         fontSize: 8,
         color: 'rgba(255,255,255,0.55)',
         lineHeight: 1.9,
       }}>
-        <div>⚠ Forgotten passwords cannot be recovered</div>
-        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-          Collected: username, password · Purpose: service use · Retention: deleted on withdrawal
+        <div style={{ marginBottom: 2 }}>
+          <span style={{ color: 'rgba(255,255,255,0.35)' }}>ID</span>{'  '}{t.idRule}
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <span style={{ color: 'rgba(255,255,255,0.35)' }}>PW</span>{'  '}{t.pwRule}
+        </div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 6, color: 'rgba(255,255,255,0.4)' }}>
+          {t.pwNoRecover}
+        </div>
+        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.28)', marginTop: 3, lineHeight: 1.6 }}>
+          {t.privacyLine1}<br />
+          {t.privacyLine2}
         </div>
       </div>
     </div>

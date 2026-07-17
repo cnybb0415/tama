@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
+import { useLang } from '@/hooks/useLang'
+import { setLang } from '@/lib/lang'
+import type { Lang } from '@/lib/lang'
 
 const CHARACTERS = [
   { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/adult/idle_01.png',     available: true },
@@ -26,6 +29,7 @@ interface Props { username: string }
 
 export default function SelectClient({ username }: Props) {
   const router = useRouter()
+  const { lang, t } = useLang()
   const [idx, setIdx]       = useState(0)
   const [flash, setFlash]   = useState<BtnSide | null>(null)
   const [notice, setNotice] = useState('')
@@ -48,7 +52,7 @@ export default function SelectClient({ username }: Props) {
   const goSelect = useCallback(() => {
     const char = CHARACTERS[idx]
     if (!char.available) {
-      press('center', () => showNotice('Coming soon'))
+      press('center', () => showNotice(t.comingSoon))
       return
     }
     setFlash('center')
@@ -90,11 +94,25 @@ export default function SelectClient({ username }: Props) {
   return (
     <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
-      {/* 상단 고정 — 유저명 */}
-      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
-        <p style={{ fontSize: 14, color: '#555' }}>
-          Hello, <span style={{ color: '#111', fontWeight: 500 }}>{username}</span>! Choose your character
+      {/* 상단 고정 — 유저명 + 언어 토글 */}
+      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <p style={{ fontSize: 14, color: '#555', margin: 0 }}>
+          {t.chooseChar(username).split(username).map((part, i, arr) =>
+            i < arr.length - 1
+              ? [part, <span key={i} style={{ color: '#111', fontWeight: 500 }}>{username}</span>]
+              : part
+          )}
         </p>
+        <span style={{ display: 'flex', gap: 4, fontSize: 11 }}>
+          {(['ko', 'en'] as Lang[]).map(l => (
+            <button key={l} onClick={() => setLang(l)} style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+              color: lang === l ? '#111' : '#9ca3af',
+              fontWeight: lang === l ? 700 : 400,
+              textDecoration: lang === l ? 'underline' : 'none',
+            }}>{l.toUpperCase()}</button>
+          ))}
+        </span>
       </div>
 
       {/* 중앙 — 타마고치만 (로그인 화면과 동일한 위치) */}
@@ -146,7 +164,7 @@ export default function SelectClient({ username }: Props) {
             pointerEvents: 'none',
             lineHeight: 1.4,
           }}>
-            Coming Soon
+            {t.comingSoon}
           </div>
         )}
 
@@ -243,30 +261,30 @@ export default function SelectClient({ username }: Props) {
 
       {/* 하단 고정 — 힌트 + 로그아웃/탈퇴 */}
       <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <p style={{ fontSize: 12, color: '#6b7280' }}>← A · S Select · D →</p>
+        <p style={{ fontSize: 12, color: '#6b7280' }}>{t.controls}</p>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button
             onClick={logout}
             style={{ fontSize: 12, color: '#4b5563', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
           >
-            Log out
+            {t.logout}
           </button>
           <span style={{ color: '#9ca3af' }}>·</span>
           {confirmDel ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <span style={{ color: '#dc2626' }}>Delete account?</span>
+              <span style={{ color: '#dc2626' }}>{t.deleteConfirm}</span>
               <button
                 onClick={deleteAccount}
                 disabled={deleting}
                 style={{ color: '#ef4444', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}
               >
-                {deleting ? '...' : 'Confirm'}
+                {deleting ? '...' : t.confirm}
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
                 style={{ color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
               >
-                Cancel
+                {t.cancel}
               </button>
             </span>
           ) : (
@@ -274,7 +292,7 @@ export default function SelectClient({ username }: Props) {
               onClick={() => setConfirmDel(true)}
               style={{ fontSize: 12, color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              Delete account
+              {t.deleteAcct}
             </button>
           )}
         </div>

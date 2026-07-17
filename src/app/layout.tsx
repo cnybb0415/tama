@@ -4,7 +4,6 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "EXO Tamagotchi",
   description: "Raise your EXO member",
-  icons: { icon: '/picture/icon.png' },
 };
 
 export default function RootLayout({

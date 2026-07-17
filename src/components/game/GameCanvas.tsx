@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { GameEngine } from '@/lib/game/engine'
 import { CharacterImages } from '@/lib/game/character'
 import { GameRenderer } from '@/lib/game/renderer'
 import { LOGICAL_W, LOGICAL_H } from '@/lib/game/config'
-import type { SaveData } from '@/lib/game/types'
+import type { AnimName, SaveData } from '@/lib/game/types'
+
+export interface GameCanvasHandle {
+  debugAnim: (name: AnimName) => void
+  debugStage: (stage: number) => void
+}
 
 interface Props {
   characterType: string
@@ -13,9 +18,17 @@ interface Props {
   onSave: (data: SaveData) => void
 }
 
-export default function GameCanvas({ characterType, initialSave, onSave }: Props) {
-  const canvasRef   = useRef<HTMLCanvasElement>(null)
-  const engineRef   = useRef<GameEngine | null>(null)
+const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
+  { characterType, initialSave, onSave },
+  ref,
+) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const engineRef = useRef<GameEngine | null>(null)
+
+  useImperativeHandle(ref, () => ({
+    debugAnim: (name: AnimName) => engineRef.current?.debugAnim(name),
+    debugStage: (stage: number) => { engineRef.current?.debugStage(stage) },
+  }))
 
   useEffect(() => {
     let cancelled = false
@@ -26,7 +39,6 @@ export default function GameCanvas({ characterType, initialSave, onSave }: Props
       if (!canvas) return
       const ctx = canvas.getContext('2d')
       if (!ctx) return
-      // ctx is non-null from here
       const ctx2d = ctx as CanvasRenderingContext2D
 
       const renderer = new GameRenderer()
@@ -44,7 +56,6 @@ export default function GameCanvas({ characterType, initialSave, onSave }: Props
       if (initialSave) engine.loadSave(initialSave)
       engineRef.current = engine
 
-      // 각 인스턴스마다 독립된 lastTime (공유 ref 사용 안 함)
       let lastTime = performance.now()
 
       function loop(time: number) {
@@ -116,4 +127,6 @@ export default function GameCanvas({ characterType, initialSave, onSave }: Props
       style={{ display: 'block', width: '100%', maxWidth: 444, height: 'auto', cursor: 'pointer' }}
     />
   )
-}
+})
+
+export default GameCanvas

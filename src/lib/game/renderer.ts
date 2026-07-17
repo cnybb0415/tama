@@ -1,9 +1,10 @@
-import { SCREEN, BTN, COLOR, MENU_LABELS, MENU_ITEMS, toCSS, LOGICAL_W, LOGICAL_H } from './config'
+import { SCREEN, BTN, COLOR, MENU_ITEMS, toCSS, LOGICAL_W, LOGICAL_H } from './config'
 import { CHARACTER_CONFIGS } from './config'
+import { getLang } from '../lang'
+import { T } from '../i18n'
 import type { CharacterAnim, CharacterImages } from './character'
 import type { GameState } from './types'
 
-const CHOICE_TEXT: Record<string, string> = { rock: 'Rock', scissors: 'Scissors', paper: 'Paper' }
 const KO_FONT = '11px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif'
 const SM_FONT = 'bold 10px Courier, monospace'
 const MD_FONT = 'bold 13px Courier, monospace'
@@ -13,6 +14,7 @@ export class GameRenderer {
   private bgImg:   HTMLImageElement | null = null
   private btnImgs: Record<string, HTMLImageElement> = {}
   characterType = 'kai'
+  private get _t() { return T[getLang()] }
 
   async loadAssets(): Promise<void> {
     this.bodyImg = await loadImg('/picture/tamagotchi/tamagotchi.png').catch(() => null)
@@ -157,22 +159,23 @@ export class GameRenderer {
 
     // Hearts
     ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
-    ctx.fillText('Hunger', sx + 6, y + 10)
+    ctx.fillText(this._t.hunger, sx + 6, y + 10)
     for (let i = 0; i < 4; i++) this._heart(ctx, sx + 52 + i * 17, y, i < stats.hunger)
     y += 20
 
     // Faces
-    ctx.fillText('Happy', sx + 6, y + 10)
+    ctx.fillText(this._t.happy, sx + 6, y + 10)
     for (let i = 0; i < 4; i++) this._face(ctx, sx + 52 + i * 17, y, i < stats.happiness)
     y += 22
 
     hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 6
 
+    const t = this._t
     const rows: [string, string, string][] = [
-      ['Age',    `${stats.age}d`,     '#ccc'],
-      ['Weight', `${stats.weight}kg`, '#ccc'],
-      ['Status', stats.sick ? 'Sick' : 'Healthy', stats.sick ? '#e06464' : '#64e064'],
-      ['Poop',   `${stats.poop_count}`,           stats.poop_count > 0 ? '#c8a040' : '#888'],
+      [t.age,         `${stats.age}${t.ageUnit}`,       '#ccc'],
+      [t.weight,      `${stats.weight}${t.weightUnit}`, '#ccc'],
+      [t.statusLabel, stats.sick ? t.sick : t.healthy,  stats.sick ? '#e06464' : '#64e064'],
+      [t.poop,        `${stats.poop_count}`,            stats.poop_count > 0 ? '#c8a040' : '#888'],
     ]
     for (const [label, value, vc] of rows) {
       ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
@@ -183,7 +186,7 @@ export class GameRenderer {
     }
 
     ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.font = SM_FONT
-    ctx.fillText('S: close', cx, SCREEN.y + SCREEN.h - 5)
+    ctx.fillText(this._t.sClose, cx, SCREEN.y + SCREEN.h - 5)
     ctx.textAlign = 'left'
   }
 
@@ -255,7 +258,7 @@ export class GameRenderer {
     }
 
     ctx.fillStyle = '#ddd'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-    ctx.fillText(MENU_LABELS[menuIndex], SCREEN.x + SCREEN.w / 2, SCREEN.y + 27)
+    ctx.fillText(this._t.menu[menuIndex], SCREEN.x + SCREEN.w / 2, SCREEN.y + 27)
     ctx.textAlign = 'left'
   }
 
@@ -303,9 +306,9 @@ export class GameRenderer {
 
     if (state.minigamePhase === 'choosing') {
       ctx.fillStyle = '#d2d2d2'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-      ctx.fillText('Rock Paper Scissors!', cx, SCREEN.y + 26)
+      ctx.fillText(this._t.rps, cx, SCREEN.y + 26)
 
-      const choices = [['A', 'Scissors'], ['S', 'Rock'], ['D', 'Paper']]
+      const choices = this._t.rpsChoices
       const bw = 37; const bh = 44; const gap = 6
       const totalW = bw * 3 + gap * 2
       const bx0 = cx - totalW / 2
@@ -324,17 +327,18 @@ export class GameRenderer {
       ctx.textAlign = 'left'
     } else {
       const colors: Record<string, string> = { win: '#50dc50', lose: '#dc5050', draw: '#dccc50' }
-      const labels: Record<string, string> = { win: 'I Win!', lose: 'I Lose...', draw: 'Draw!' }
+      const t = this._t
+      const resultLabels: Record<string, string> = { win: t.win, lose: t.lose, draw: t.draw }
       const member = CHARACTER_CONFIGS[this.characterType]?.displayName ?? 'AI'
-      const you = CHOICE_TEXT[state.minigamePlayer ?? ''] ?? '?'
-      const me  = CHOICE_TEXT[state.minigamePc ?? ''] ?? '?'
+      const you = t.choiceText[state.minigamePlayer ?? ''] ?? '?'
+      const me  = t.choiceText[state.minigamePc ?? ''] ?? '?'
 
       ctx.fillStyle = '#aaa'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-      ctx.fillText(`Me: ${you}  vs  ${member}: ${me}`, cx, SCREEN.y + SCREEN.h / 2 - 14)
+      ctx.fillText(`${t.me}: ${you}  vs  ${member}: ${me}`, cx, SCREEN.y + SCREEN.h / 2 - 14)
       ctx.fillStyle = colors[state.minigameResult ?? ''] ?? '#ccc'
-      ctx.fillText(labels[state.minigameResult ?? ''] ?? '?', cx, SCREEN.y + SCREEN.h / 2 + 4)
+      ctx.fillText(resultLabels[state.minigameResult ?? ''] ?? '?', cx, SCREEN.y + SCREEN.h / 2 + 4)
       ctx.fillStyle = '#555'; ctx.font = SM_FONT
-      ctx.fillText('S: close', cx, SCREEN.y + SCREEN.h / 2 + 24)
+      ctx.fillText(t.sClose, cx, SCREEN.y + SCREEN.h / 2 + 24)
       ctx.textAlign = 'left'
     }
   }
@@ -349,9 +353,9 @@ export class GameRenderer {
       ctx.fillStyle = `rgba(180,180,180,${alpha / 200})`; ctx.font = 'bold 28px Courier'
       ctx.fillText('...', cx, SCREEN.y + 45)
       ctx.fillStyle = `rgba(120,120,120,${alpha / 200})`; ctx.font = SM_FONT
-      ctx.fillText('Goodbye...', cx, SCREEN.y + 65)
+      ctx.fillText(this._t.goodbye, cx, SCREEN.y + 65)
       ctx.fillStyle = `rgba(100,100,100,${alpha / 200})`
-      ctx.fillText('[S] Restart', cx, SCREEN.y + 80)
+      ctx.fillText(this._t.restart, cx, SCREEN.y + 80)
       ctx.textAlign = 'left'
     }
   }
@@ -375,7 +379,6 @@ export class GameRenderer {
   // ── Buttons ─────────────────────────────────────────────────────────────
 
   private _drawButtons(ctx: CanvasRenderingContext2D, flash: Record<string, number>): void {
-    // 바디 이미지에 이미 기본 버튼이 그려져 있으므로, 눌렸을 때만 pressed 이미지를 덮어씀
     for (const [side, pos] of [
       ['left',   BTN.left],
       ['center', BTN.center],
@@ -383,7 +386,13 @@ export class GameRenderer {
     ] as const) {
       if (flash[side] > 0) {
         const img = this.btnImgs[`${side}_pressed`]
-        if (img) ctx.drawImage(img, pos.x, pos.y, pos.w, pos.h)
+        if (!img?.complete || !img.naturalWidth) continue
+        const scale = 0.4
+        const iw = img.naturalWidth  * scale
+        const ih = img.naturalHeight * scale
+        const cx = pos.x + pos.w / 2
+        const cy = pos.y + pos.h / 2
+        ctx.drawImage(img, cx - iw / 2, cy - ih / 2, iw, ih)
       }
     }
   }
