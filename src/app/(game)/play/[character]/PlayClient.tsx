@@ -48,7 +48,7 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', width: '100%' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 상단 — 캔버스에 overlaid */}
