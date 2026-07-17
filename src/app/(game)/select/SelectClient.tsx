@@ -5,8 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
 
 const CHARACTERS = [
-  { id: 'kai',  name: '카이', idleImg: '/picture/exo/kai/adult/idle_01.png', available: true },
-  { id: 'suho', name: '수호', idleImg: '/picture/exo/suho/idle_01.png',      available: false },
+  { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/adult/idle_01.png',     available: true },
+  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/adult/idle_01.png',      available: true },
+  { id: 'chanyeol', name: 'CHANYEOL', idleImg: '/picture/exo/chanyeol/adult/idle_01.png', available: true },
+  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/adult/idle_01.png',       available: true },
+  { id: 'kai',      name: 'KAI',      idleImg: '/picture/exo/kai/adult/idle_01.png',      available: true },
+  { id: 'sehun',    name: 'SEHUN',    idleImg: '/picture/exo/sehun/adult/idle_01.png',    available: true },
 ]
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
@@ -44,7 +48,7 @@ export default function SelectClient({ username }: Props) {
   const goSelect = useCallback(() => {
     const char = CHARACTERS[idx]
     if (!char.available) {
-      press('center', () => showNotice('준비 중입니다'))
+      press('center', () => showNotice('Coming soon'))
       return
     }
     setFlash('center')
@@ -77,7 +81,7 @@ export default function SelectClient({ username }: Props) {
       router.push('/login')
     } else {
       const data = await res.json()
-      showNotice(data.error ?? '오류가 발생했습니다.')
+      showNotice(data.error ?? 'An error occurred.')
       setDeleting(false)
       setConfirmDel(false)
     }
@@ -89,7 +93,7 @@ export default function SelectClient({ username }: Props) {
       {/* 상단 고정 — 유저명 */}
       <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
         <p style={{ fontSize: 14, color: '#555' }}>
-          <span style={{ color: '#111', fontWeight: 500 }}>{username}</span>님, 캐릭터를 선택하세요
+          Hello, <span style={{ color: '#111', fontWeight: 500 }}>{username}</span>! Choose your character
         </p>
       </div>
 
@@ -142,7 +146,7 @@ export default function SelectClient({ username }: Props) {
             pointerEvents: 'none',
             lineHeight: 1.4,
           }}>
-            준비 중
+            Coming Soon
           </div>
         )}
 
@@ -219,7 +223,7 @@ export default function SelectClient({ username }: Props) {
           <button
             key={side}
             onClick={side === 'left' ? goPrev : side === 'right' ? goNext : goSelect}
-            aria-label={side === 'center' ? '선택' : side === 'left' ? '이전' : '다음'}
+            aria-label={side === 'center' ? 'Select' : side === 'left' ? 'Prev' : 'Next'}
             style={{
               position:   'absolute',
               left:       `${BTNS[side].left}%`,
@@ -239,30 +243,30 @@ export default function SelectClient({ username }: Props) {
 
       {/* 하단 고정 — 힌트 + 로그아웃/탈퇴 */}
       <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <p style={{ fontSize: 12, color: '#6b7280' }}>← A · S 선택 · D →</p>
+        <p style={{ fontSize: 12, color: '#6b7280' }}>← A · S Select · D →</p>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button
             onClick={logout}
             style={{ fontSize: 12, color: '#4b5563', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
           >
-            로그아웃
+            Log out
           </button>
           <span style={{ color: '#9ca3af' }}>·</span>
           {confirmDel ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <span style={{ color: '#dc2626' }}>정말 탈퇴하시겠어요?</span>
+              <span style={{ color: '#dc2626' }}>Delete account?</span>
               <button
                 onClick={deleteAccount}
                 disabled={deleting}
                 style={{ color: '#ef4444', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}
               >
-                {deleting ? '처리 중...' : '확인'}
+                {deleting ? '...' : 'Confirm'}
               </button>
               <button
                 onClick={() => setConfirmDel(false)}
                 style={{ color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
               >
-                취소
+                Cancel
               </button>
             </span>
           ) : (
@@ -270,7 +274,7 @@ export default function SelectClient({ username }: Props) {
               onClick={() => setConfirmDel(true)}
               style={{ fontSize: 12, color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              회원탈퇴
+              Delete account
             </button>
           )}
         </div>

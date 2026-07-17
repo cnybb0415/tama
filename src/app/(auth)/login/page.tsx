@@ -22,7 +22,7 @@ export default function LoginPage() {
     const email = `${username.trim().toLowerCase()}@reverxe.game`
     const { error: err } = await supabase.auth.signInWithPassword({ email, password })
     if (err) {
-      setError('아이디/비번 오류')
+      setError('Invalid username or password')
       setLoading(false)
     } else {
       router.push('/select')
@@ -106,7 +106,7 @@ export default function LoginPage() {
             style={inputStyle}
             value={username}
             onChange={e => setUsername(e.target.value)}
-            placeholder="아이디"
+            placeholder="Username"
             autoComplete="username"
             required
           />
@@ -118,7 +118,7 @@ export default function LoginPage() {
             style={{ ...inputStyle, letterSpacing: 2 }}
             value={password}
             onChange={e => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="비밀번호"
+            placeholder="Password"
             autoComplete="current-password"
             required
           />
@@ -165,7 +165,7 @@ export default function LoginPage() {
                 textDecoration: 'none',
               }}
             >
-              회원가입
+              Sign up
             </Link>
           </div>
         </form>

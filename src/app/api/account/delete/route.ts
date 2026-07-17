@@ -11,7 +11,7 @@ export async function POST() {
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.deleteUser(user.id)
 
-  if (error) return NextResponse.json({ error: '탈퇴 처리 중 오류가 발생했습니다.' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Failed to delete account.' }, { status: 500 })
 
   // 세션 쿠키 제거
   await supabase.auth.signOut()

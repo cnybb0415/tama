@@ -17,23 +17,51 @@ export const ACTION_ANIMS = new Set<AnimName>(['eat', 'happy', 'poop', 'angry', 
 
 export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   kai: {
-    displayName: '카이',
+    displayName: 'KAI',
     evolutionDay: 7,
     stages: [
-      {
-        folder: '/picture/exo/kai/kid',
-        prefix: 'kai_kid_',
-        fileMap: { poop: 'trash', special: 'dance' },
-        frameOverrides: { special: 5 },
-        name: '카이 어린이',
-      },
-      {
-        folder: '/picture/exo/kai/adult',
-        prefix: '',
-        fileMap: { poop: 'trash', special: 'dance' },
-        frameOverrides: {},
-        name: '카이 성인',
-      },
+      { folder: '/picture/exo/kai/kid',      prefix: 'kai_kid_',      fileMap: { poop: 'trash', special: 'dance' },            frameOverrides: { special: 5 }, name: 'KAI (Kid)'      },
+      { folder: '/picture/exo/kai/adult',     prefix: '',              fileMap: { poop: 'trash', special: 'dance' },            frameOverrides: {},             name: 'KAI'            },
+    ],
+  },
+  chanyeol: {
+    displayName: 'CHANYEOL',
+    evolutionDay: 7,
+    stages: [
+      { folder: '/picture/exo/chanyeol/kid',  prefix: 'chanyeol_kid_', fileMap: { poop: 'trash', special: 'ferret' },          frameOverrides: { special: 5 }, name: 'CHANYEOL (Kid)' },
+      { folder: '/picture/exo/chanyeol/adult',prefix: '',              fileMap: { poop: 'trash', special: 'basketball_detail' },frameOverrides: {},             name: 'CHANYEOL'       },
+    ],
+  },
+  do: {
+    displayName: 'D.O.',
+    evolutionDay: 7,
+    stages: [
+      { folder: '/picture/exo/do/kid',        prefix: 'dio_kid_',      fileMap: { poop: 'trash', special: 'bedding' },         frameOverrides: { special: 5 }, name: 'D.O. (Kid)'     },
+      { folder: '/picture/exo/do/adult',      prefix: '',              fileMap: { poop: 'trash', special: 'cooking' },         frameOverrides: {},             name: 'D.O.'           },
+    ],
+  },
+  ray: {
+    displayName: 'LAY',
+    evolutionDay: 7,
+    stages: [
+      { folder: '/picture/exo/ray/kid',       prefix: 'ray_kid_',      fileMap: { poop: 'trash', special: 'dance2' },          frameOverrides: { special: 5 }, name: 'LAY (Kid)'      },
+      { folder: '/picture/exo/ray/adult',     prefix: '',              fileMap: { poop: 'trash', special: 'handstand' },       frameOverrides: { special: 5 }, name: 'LAY'            },
+    ],
+  },
+  sehun: {
+    displayName: 'SEHUN',
+    evolutionDay: 7,
+    stages: [
+      { folder: '/picture/exo/sehun/kid',     prefix: 'sehun_kid_',    fileMap: { poop: 'trash', special: 'run' },             frameOverrides: { special: 5 }, name: 'SEHUN (Kid)'    },
+      { folder: '/picture/exo/sehun/adult',   prefix: '',              fileMap: { poop: 'trash', special: 'magic_walk' },      frameOverrides: {},             name: 'SEHUN'          },
+    ],
+  },
+  suho: {
+    displayName: 'SUHO',
+    evolutionDay: 7,
+    stages: [
+      { folder: '/picture/exo/suho/kid',      prefix: 'suho_kid_',     fileMap: { poop: 'trash', special: 'study' },           frameOverrides: { special: 4 }, name: 'SUHO (Kid)'     },
+      { folder: '/picture/exo/suho/adult',    prefix: '',              fileMap: { poop: 'trash', special: 'guitar' },          frameOverrides: {},             name: 'SUHO'           },
     ],
   },
 }
@@ -49,7 +77,7 @@ export const LOGICAL_W = 531
 export const LOGICAL_H = 500
 
 export const MENU_ITEMS = ['feed', 'play', 'pet', 'medicine', 'clean', 'status', 'special']
-export const MENU_LABELS = ['밥', '놀기', '쓰다듬기', '약', '청소', '상태', '스페셜']
+export const MENU_LABELS = ['Eat', 'Play', 'Hug', 'Heal', 'Shower', 'Status', 'Special']
 
 // 색상
 export const COLOR = {

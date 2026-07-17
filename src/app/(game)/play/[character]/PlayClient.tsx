@@ -33,7 +33,7 @@ export default function PlayClient({ characterType, initialSave }: Props) {
       {/* 상단 고정 */}
       <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
         <Link href="/select" style={{ fontSize: 12, color: '#4b5563' }}>
-          ← 캐릭터 선택
+          ← Characters
         </Link>
       </div>
 
@@ -46,7 +46,7 @@ export default function PlayClient({ characterType, initialSave }: Props) {
 
       {/* 하단 고정 */}
       <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: '#6b7280' }}>← A/D → · S 선택 · 모바일: 버튼 터치</p>
+        <p style={{ fontSize: 12, color: '#6b7280' }}>← A/D → · S Select · Mobile: tap buttons</p>
       </div>
     </div>
   )

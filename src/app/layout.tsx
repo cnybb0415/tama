@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "REVERXE",
-  description: "REVERXE Tamagotchi",
+  title: "EXO Tamagotchi",
+  description: "Raise your EXO member",
+  icons: { icon: '/picture/icon.png' },
 };
 
 export default function RootLayout({

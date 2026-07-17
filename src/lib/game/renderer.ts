@@ -3,7 +3,7 @@ import { CHARACTER_CONFIGS } from './config'
 import type { CharacterAnim, CharacterImages } from './character'
 import type { GameState } from './types'
 
-const CHOICE_TEXT: Record<string, string> = { rock: '바위', scissors: '가위', paper: '보' }
+const CHOICE_TEXT: Record<string, string> = { rock: 'Rock', scissors: 'Scissors', paper: 'Paper' }
 const KO_FONT = '11px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif'
 const SM_FONT = 'bold 10px Courier, monospace'
 const MD_FONT = 'bold 13px Courier, monospace'
@@ -157,22 +157,22 @@ export class GameRenderer {
 
     // Hearts
     ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
-    ctx.fillText('배고픔', sx + 6, y + 10)
+    ctx.fillText('Hunger', sx + 6, y + 10)
     for (let i = 0; i < 4; i++) this._heart(ctx, sx + 52 + i * 17, y, i < stats.hunger)
     y += 20
 
     // Faces
-    ctx.fillText('행복도', sx + 6, y + 10)
+    ctx.fillText('Happy', sx + 6, y + 10)
     for (let i = 0; i < 4; i++) this._face(ctx, sx + 52 + i * 17, y, i < stats.happiness)
     y += 22
 
     hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 6
 
     const rows: [string, string, string][] = [
-      ['나이',   `${stats.age}일`,    '#ccc'],
-      ['몸무게', `${stats.weight}kg`, '#ccc'],
-      ['상태',   stats.sick ? '아픔' : '건강', stats.sick ? '#e06464' : '#64e064'],
-      ['응가',   `${stats.poop_count}개`,     stats.poop_count > 0 ? '#c8a040' : '#888'],
+      ['Age',    `${stats.age}d`,     '#ccc'],
+      ['Weight', `${stats.weight}kg`, '#ccc'],
+      ['Status', stats.sick ? 'Sick' : 'Healthy', stats.sick ? '#e06464' : '#64e064'],
+      ['Poop',   `${stats.poop_count}`,           stats.poop_count > 0 ? '#c8a040' : '#888'],
     ]
     for (const [label, value, vc] of rows) {
       ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
@@ -303,9 +303,9 @@ export class GameRenderer {
 
     if (state.minigamePhase === 'choosing') {
       ctx.fillStyle = '#d2d2d2'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-      ctx.fillText('가위바위보!', cx, SCREEN.y + 26)
+      ctx.fillText('Rock Paper Scissors!', cx, SCREEN.y + 26)
 
-      const choices = [['A', '가위'], ['S', '바위'], ['D', '보']]
+      const choices = [['A', 'Scissors'], ['S', 'Rock'], ['D', 'Paper']]
       const bw = 37; const bh = 44; const gap = 6
       const totalW = bw * 3 + gap * 2
       const bx0 = cx - totalW / 2
@@ -324,17 +324,17 @@ export class GameRenderer {
       ctx.textAlign = 'left'
     } else {
       const colors: Record<string, string> = { win: '#50dc50', lose: '#dc5050', draw: '#dccc50' }
-      const labels: Record<string, string> = { win: '이겼다!', lose: '졌다...', draw: '비겼다!' }
+      const labels: Record<string, string> = { win: 'I Win!', lose: 'I Lose...', draw: 'Draw!' }
       const member = CHARACTER_CONFIGS[this.characterType]?.displayName ?? 'AI'
       const you = CHOICE_TEXT[state.minigamePlayer ?? ''] ?? '?'
       const me  = CHOICE_TEXT[state.minigamePc ?? ''] ?? '?'
 
       ctx.fillStyle = '#aaa'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-      ctx.fillText(`나: ${you}  vs  ${member}: ${me}`, cx, SCREEN.y + SCREEN.h / 2 - 14)
+      ctx.fillText(`Me: ${you}  vs  ${member}: ${me}`, cx, SCREEN.y + SCREEN.h / 2 - 14)
       ctx.fillStyle = colors[state.minigameResult ?? ''] ?? '#ccc'
       ctx.fillText(labels[state.minigameResult ?? ''] ?? '?', cx, SCREEN.y + SCREEN.h / 2 + 4)
       ctx.fillStyle = '#555'; ctx.font = SM_FONT
-      ctx.fillText('S: 닫기', cx, SCREEN.y + SCREEN.h / 2 + 24)
+      ctx.fillText('S: close', cx, SCREEN.y + SCREEN.h / 2 + 24)
       ctx.textAlign = 'left'
     }
   }
@@ -349,9 +349,9 @@ export class GameRenderer {
       ctx.fillStyle = `rgba(180,180,180,${alpha / 200})`; ctx.font = 'bold 28px Courier'
       ctx.fillText('...', cx, SCREEN.y + 45)
       ctx.fillStyle = `rgba(120,120,120,${alpha / 200})`; ctx.font = SM_FONT
-      ctx.fillText('잘 가...', cx, SCREEN.y + 65)
+      ctx.fillText('Goodbye...', cx, SCREEN.y + 65)
       ctx.fillStyle = `rgba(100,100,100,${alpha / 200})`
-      ctx.fillText('[S] 다시 시작', cx, SCREEN.y + 80)
+      ctx.fillText('[S] Restart', cx, SCREEN.y + 80)
       ctx.textAlign = 'left'
     }
   }

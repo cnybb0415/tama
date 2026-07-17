@@ -16,9 +16,9 @@ export default function RegisterPage() {
   const [loading, setLoading]   = useState(false)
 
   const validate = (): string => {
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return '영문/숫자/_ 3~20자'
-    if (!/^\d{6}$/.test(password))               return '숫자 6자리 필요'
-    if (password !== confirm)                     return '비번 불일치'
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return 'Username: 3-20 chars (a-z, 0-9, _)'
+    if (!/^\d{6}$/.test(password))               return 'Password: 6 digits required'
+    if (password !== confirm)                     return 'Passwords do not match'
     return ''
   }
 
@@ -38,9 +38,9 @@ export default function RegisterPage() {
 
     if (signUpErr) {
       if (signUpErr.message.includes('already registered'))
-        setError('이미 사용 중인 아이디')
+        setError('Username already taken')
       else
-        setError('가입 오류')
+        setError('Sign up failed')
       setLoading(false)
     } else {
       router.push('/select')
@@ -124,7 +124,7 @@ export default function RegisterPage() {
             style={inputStyle}
             value={username}
             onChange={e => setUsername(e.target.value)}
-            placeholder="아이디 (영문/숫자/_)"
+            placeholder="Username (a-z, 0-9, _)"
             autoComplete="username"
             required
           />
@@ -136,7 +136,7 @@ export default function RegisterPage() {
             style={{ ...inputStyle, letterSpacing: 2 }}
             value={password}
             onChange={e => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="비밀번호 (숫자 6자리)"
+            placeholder="Password (6 digits)"
             autoComplete="new-password"
             required
           />
@@ -148,7 +148,7 @@ export default function RegisterPage() {
             style={{ ...inputStyle, letterSpacing: 2 }}
             value={confirm}
             onChange={e => setConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="비밀번호 확인"
+            placeholder="Confirm password"
             autoComplete="new-password"
             required
           />
@@ -182,7 +182,7 @@ export default function RegisterPage() {
               marginTop: 1,
             }}
           >
-            {loading ? '...' : '가입하기'}
+            {loading ? '...' : 'SIGN UP'}
           </button>
 
           <div style={{ textAlign: 'center', marginTop: 'auto' }}>
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                 textDecoration: 'none',
               }}
             >
-              로그인
+              Log in
             </Link>
           </div>
         </form>
@@ -224,9 +224,9 @@ export default function RegisterPage() {
         color: 'rgba(255,255,255,0.55)',
         lineHeight: 1.9,
       }}>
-        <div>⚠ 비밀번호를 잊어버리면 복구가 불가능합니다</div>
+        <div>⚠ Forgotten passwords cannot be recovered</div>
         <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-          수집 항목: 아이디, 비밀번호 · 목적: 서비스 이용 · 보관: 탈퇴 시 삭제
+          Collected: username, password · Purpose: service use · Retention: deleted on withdrawal
         </div>
       </div>
     </div>
