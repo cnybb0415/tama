@@ -92,31 +92,23 @@ export default function SelectClient({ username }: Props) {
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-
-      {/* 상단 고정 — 유저명 + 언어 토글 */}
-      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-        <p style={{ fontSize: 14, color: '#555', margin: 0 }}>
-          {t.chooseChar(username).split(username).map((part, i, arr) =>
-            i < arr.length - 1
-              ? [part, <span key={i} style={{ color: '#111', fontWeight: 500 }}>{username}</span>]
-              : part
-          )}
-        </p>
-        <span style={{ display: 'flex', gap: 4, fontSize: 11 }}>
-          {(['ko', 'en'] as Lang[]).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-              color: lang === l ? '#111' : '#9ca3af',
-              fontWeight: lang === l ? 700 : 400,
-              textDecoration: lang === l ? 'underline' : 'none',
-            }}>{l.toUpperCase()}</button>
-          ))}
-        </span>
-      </div>
-
-      {/* 중앙 — 타마고치만 (로그인 화면과 동일한 위치) */}
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
+
+        {/* 유저명 + 언어 토글 — 타마고치 위 */}
+        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <span style={{ fontSize: 10, color: '#888', fontFamily: 'Galmuri9, sans-serif' }}>{username}</span>
+          <span style={{ display: 'flex', gap: 2 }}>
+            {(['ko', 'en'] as Lang[]).map(l => (
+              <button key={l} onClick={() => setLang(l)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px',
+                fontSize: 9, fontFamily: 'Galmuri9, sans-serif',
+                color: lang === l ? '#ccc' : '#555',
+                fontWeight: lang === l ? 700 : 400,
+              }}>{l.toUpperCase()}</button>
+            ))}
+          </span>
+        </div>
 
         {/* 스크린 안 배경 (게임 장면) */}
         <div style={{
@@ -257,44 +249,30 @@ export default function SelectClient({ username }: Props) {
             }}
           />
         ))}
-      </div>
-
-      {/* 하단 고정 — 힌트 + 로그아웃/탈퇴 */}
-      <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <p style={{ fontSize: 12, color: '#6b7280' }}>{t.controls}</p>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button
-            onClick={logout}
-            style={{ fontSize: 12, color: '#4b5563', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            {t.logout}
-          </button>
-          <span style={{ color: '#9ca3af' }}>·</span>
-          {confirmDel ? (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <span style={{ color: '#dc2626' }}>{t.deleteConfirm}</span>
-              <button
-                onClick={deleteAccount}
-                disabled={deleting}
-                style={{ color: '#ef4444', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}
-              >
-                {deleting ? '...' : t.confirm}
-              </button>
-              <button
-                onClick={() => setConfirmDel(false)}
-                style={{ color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                {t.cancel}
-              </button>
-            </span>
-          ) : (
-            <button
-              onClick={() => setConfirmDel(true)}
-              style={{ fontSize: 12, color: '#6b7280', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              {t.deleteAcct}
+        {/* 로그아웃/탈퇴 — 타마고치 하단 */}
+        <div style={{ position: 'absolute', bottom: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <p style={{ fontSize: 9, color: '#666', margin: 0, fontFamily: 'Galmuri9, sans-serif' }}>{t.controls}</p>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button onClick={logout} style={{ fontSize: 10, color: '#666', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
+              {t.logout}
             </button>
-          )}
+            <span style={{ color: '#555' }}>·</span>
+            {confirmDel ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontFamily: 'Galmuri9, sans-serif' }}>
+                <span style={{ color: '#dc2626' }}>{t.deleteConfirm}</span>
+                <button onClick={deleteAccount} disabled={deleting} style={{ color: '#ef4444', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}>
+                  {deleting ? '...' : t.confirm}
+                </button>
+                <button onClick={() => setConfirmDel(false)} style={{ color: '#555', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  {t.cancel}
+                </button>
+              </span>
+            ) : (
+              <button onClick={() => setConfirmDel(true)} style={{ fontSize: 10, color: '#555', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
+                {t.deleteAcct}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

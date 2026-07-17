@@ -66,23 +66,29 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: 444, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {/* 상단 — 뒤로가기 + 언어 토글 */}
-      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <Link href="/login" style={{ fontSize: 12, color: '#4b5563', textDecoration: 'none' }}>
-          ← {lang === 'ko' ? '로그인' : 'Log in'}
+    <div style={{ width: '100%', maxWidth: 444 }}>
+      <div style={{ position: 'relative', width: '100%' }}>
+
+        {/* 뒤로가기 — 타마고치 왼쪽 위 */}
+        <Link href="/login" style={{
+          position: 'absolute', top: '4%', left: '3%', zIndex: 5,
+          fontSize: 10, color: '#aaa', textDecoration: 'none',
+          fontFamily: 'Galmuri9, sans-serif',
+        }}>
+          ←
         </Link>
-        <div style={{ display: 'flex', gap: 4, fontSize: 11 }}>
+
+        {/* 언어 토글 — 타마고치 오른쪽 위 */}
+        <div style={{ position: 'absolute', top: '4%', right: '3%', display: 'flex', gap: 2, zIndex: 5 }}>
           {(['ko', 'en'] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{
               background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-              color: lang === l ? '#9ca3af' : '#4b5563',
+              fontSize: 10, fontFamily: 'Galmuri9, sans-serif',
+              color: lang === l ? '#ccc' : '#555',
               fontWeight: lang === l ? 700 : 400,
             }}>{l.toUpperCase()}</button>
           ))}
         </div>
-      </div>
-      <div style={{ position: 'relative', width: '100%' }}>
 
         {/* 스크린 안 배경 — background.png (하늘+구름) */}
         <div style={{
@@ -218,34 +224,27 @@ export default function RegisterPage() {
             pointerEvents: 'none',
           }}
         />
-      </div>
 
-      {/* 조건 + 개인정보 박스 */}
-      <div style={{
-        marginTop: 10,
-        width: '100%',
-        padding: '8px 12px',
-        background: 'rgba(0,0,0,0.35)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 4,
-        boxSizing: 'border-box',
-        fontFamily: 'Galmuri9, sans-serif',
-        fontSize: 8,
-        color: 'rgba(255,255,255,0.55)',
-        lineHeight: 1.9,
-      }}>
-        <div style={{ marginBottom: 2 }}>
-          <span style={{ color: 'rgba(255,255,255,0.35)' }}>ID</span>{'  '}{t.idRule}
-        </div>
-        <div style={{ marginBottom: 6 }}>
-          <span style={{ color: 'rgba(255,255,255,0.35)' }}>PW</span>{'  '}{t.pwRule}
-        </div>
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 6, color: 'rgba(255,255,255,0.4)' }}>
-          {t.pwNoRecover}
-        </div>
-        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.28)', marginTop: 3, lineHeight: 1.6 }}>
-          {t.privacyLine1}<br />
-          {t.privacyLine2}
+        {/* 조건 + 개인정보 박스 — 타마고치 하단 */}
+        <div style={{
+          position: 'absolute',
+          bottom: '2%',
+          left: '5%', right: '5%',
+          zIndex: 5,
+          padding: '5px 8px',
+          background: 'rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 3,
+          fontFamily: 'Galmuri9, sans-serif',
+          fontSize: 7,
+          color: 'rgba(255,255,255,0.45)',
+          lineHeight: 1.7,
+        }}>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>ID</span>{' '}{t.idRule}
+          {'  '}
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>PW</span>{' '}{t.pwRule}
+          <br />
+          <span style={{ color: 'rgba(255,255,255,0.28)', fontSize: 6 }}>{t.pwNoRecover} · {t.privacyLine2}</span>
         </div>
       </div>
     </div>

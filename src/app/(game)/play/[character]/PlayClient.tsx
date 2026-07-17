@@ -48,75 +48,72 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
-      {/* 상단 */}
-      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <Link href="/select" style={{ fontSize: 12, color: '#4b5563' }}>
-          {t.characters}
-        </Link>
-        <span style={{ display: 'flex', gap: 4, fontSize: 11 }}>
-          {(['ko', 'en'] as Lang[]).map(l => (
-            <button key={l} onClick={() => setLang(l)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-              color: lang === l ? '#9ca3af' : '#4b5563',
-              fontWeight: lang === l ? 700 : 400,
-            }}>{l.toUpperCase()}</button>
-          ))}
-        </span>
-        {isAdmin && (
-          <button
-            onClick={() => setDebug(d => !d)}
-            style={{ ...btn, color: debug ? '#f9d94e' : '#4b5563', borderColor: debug ? '#f9d94e44' : 'transparent', background: 'none' }}
-          >
-            DEBUG
-          </button>
-        )}
-      </div>
-
-      {/* 캔버스 */}
-      <GameCanvas
-        ref={gameRef}
-        characterType={characterType}
-        initialSave={initialSave}
-        onSave={handleSave}
-      />
-
-      {/* 디버그 패널 */}
-      {debug && (
-        <div style={{
-          position: 'absolute',
-          right: 12,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-          background: 'rgba(0,0,0,0.7)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8,
-          padding: '10px 8px',
-        }}>
-          {/* 스테이지 */}
-          <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.stageLabel}</div>
-          <button style={btn} onClick={() => gameRef.current?.debugStage(0)}>{t.kid}</button>
-          <button style={btn} onClick={() => gameRef.current?.debugStage(1)}>{t.adult}</button>
-
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
-
-          {/* 애니메이션 */}
-          <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.animLabel}</div>
-          {ANIMS.map(a => (
-            <button key={a} style={btn} onClick={() => gameRef.current?.debugAnim(a)}>
-              {a}
+        {/* 상단 — 캔버스에 overlaid */}
+        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <Link href="/select" style={{ fontSize: 10, color: '#888', fontFamily: 'Galmuri9, sans-serif', textDecoration: 'none' }}>
+            ← {t.characters}
+          </Link>
+          <span style={{ display: 'flex', gap: 2 }}>
+            {(['ko', 'en'] as Lang[]).map(l => (
+              <button key={l} onClick={() => setLang(l)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px',
+                fontSize: 9, fontFamily: 'Galmuri9, sans-serif',
+                color: lang === l ? '#ccc' : '#555',
+                fontWeight: lang === l ? 700 : 400,
+              }}>{l.toUpperCase()}</button>
+            ))}
+          </span>
+          {isAdmin && (
+            <button
+              onClick={() => setDebug(d => !d)}
+              style={{ ...btn, fontSize: 9, padding: '1px 4px', color: debug ? '#f9d94e' : '#555', borderColor: debug ? '#f9d94e44' : 'transparent', background: 'none' }}
+            >
+              DEBUG
             </button>
-          ))}
+          )}
         </div>
-      )}
 
-      {/* 하단 힌트 */}
-      <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: '#6b7280' }}>{t.ctrlsPlay}</p>
+        {/* 캔버스 */}
+        <GameCanvas
+          ref={gameRef}
+          characterType={characterType}
+          initialSave={initialSave}
+          onSave={handleSave}
+        />
+
+        {/* 하단 힌트 — 캔버스에 overlaid */}
+        <div style={{ position: 'absolute', bottom: '2%', left: 0, right: 0, zIndex: 5, textAlign: 'center' }}>
+          <p style={{ fontSize: 9, color: '#555', margin: 0, fontFamily: 'Galmuri9, sans-serif' }}>{t.ctrlsPlay}</p>
+        </div>
+
+        {/* 디버그 패널 */}
+        {debug && (
+          <div style={{
+            position: 'absolute',
+            right: 4,
+            top: '10%',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            background: 'rgba(0,0,0,0.7)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 8,
+            padding: '10px 8px',
+          }}>
+            <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.stageLabel}</div>
+            <button style={btn} onClick={() => gameRef.current?.debugStage(0)}>{t.kid}</button>
+            <button style={btn} onClick={() => gameRef.current?.debugStage(1)}>{t.adult}</button>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
+            <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.animLabel}</div>
+            {ANIMS.map(a => (
+              <button key={a} style={btn} onClick={() => gameRef.current?.debugAnim(a)}>{a}</button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -17,8 +17,6 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
         flexDirection: 'column',
         alignItems: 'center',
         minHeight: '100vh',
-        padding: '0 16px',
-        boxSizing: 'border-box',
       }}>
         {children}
       </div>

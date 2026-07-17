@@ -48,20 +48,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: 444, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {/* 언어 토글 */}
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-        <div style={{ display: 'flex', gap: 4, fontSize: 11 }}>
+    <div style={{ width: '100%', maxWidth: 444 }}>
+      <div style={{ position: 'relative', width: '100%' }}>
+
+        {/* 언어 토글 — 타마고치 오른쪽 위 */}
+        <div style={{ position: 'absolute', top: '4%', right: '3%', display: 'flex', gap: 2, zIndex: 5 }}>
           {(['ko', 'en'] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{
               background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-              color: lang === l ? '#9ca3af' : '#4b5563',
+              fontSize: 10, fontFamily: 'Galmuri9, sans-serif',
+              color: lang === l ? '#ccc' : '#555',
               fontWeight: lang === l ? 700 : 400,
             }}>{l.toUpperCase()}</button>
           ))}
         </div>
-      </div>
-      <div style={{ position: 'relative', width: '100%' }}>
 
         {/* 스크린 안 배경 — 게임과 동일한 background.png (하늘+구름) */}
         <div style={{
@@ -173,7 +173,7 @@ export default function LoginPage() {
 
         </form>
 
-        {/* 타마고치 바디 — transparent screen으로 폼 노출, 클릭 통과 */}
+        {/* 타마고치 바디 */}
         <img
           src="/picture/tamagotchi/tamagotchi.png"
           alt=""
@@ -185,14 +185,27 @@ export default function LoginPage() {
             pointerEvents: 'none',
           }}
         />
-      </div>
 
-      {/* 회원가입 링크 */}
-      <div style={{ marginTop: 14, fontSize: 12, color: '#4b5563' }}>
-        {lang === 'ko' ? '계정이 없으신가요? ' : "Don't have an account? "}
-        <Link href="/register" style={{ color: '#9ca3af', textDecoration: 'underline' }}>
-          {lang === 'ko' ? '회원가입' : 'Sign up'}
-        </Link>
+        {/* 회원가입 링크 — 타마고치 하단 */}
+        <div style={{
+          position: 'absolute',
+          bottom: '3%',
+          left: 0, right: 0,
+          textAlign: 'center',
+          zIndex: 5,
+          fontSize: 11,
+          fontFamily: 'Galmuri9, sans-serif',
+        }}>
+          <Link href="/register" style={{
+            color: '#e5e7eb',
+            textDecoration: 'none',
+            background: 'rgba(0,0,0,0.45)',
+            padding: '3px 10px',
+            borderRadius: 3,
+          }}>
+            {lang === 'ko' ? '회원가입' : 'Sign up'}
+          </Link>
+        </div>
       </div>
     </div>
   )
