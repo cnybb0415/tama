@@ -16,9 +16,10 @@ const ANIMS: AnimName[] = ['idle', 'walk', 'happy', 'eat', 'sleep', 'sad', 'sick
 interface Props {
   characterType: string
   initialSave: SaveData | null
+  isAdmin: boolean
 }
 
-export default function PlayClient({ characterType, initialSave }: Props) {
+export default function PlayClient({ characterType, initialSave, isAdmin }: Props) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const gameRef = useRef<GameCanvasHandle>(null)
   const [debug, setDebug] = useState(false)
@@ -63,12 +64,14 @@ export default function PlayClient({ characterType, initialSave }: Props) {
             }}>{l.toUpperCase()}</button>
           ))}
         </span>
-        <button
-          onClick={() => setDebug(d => !d)}
-          style={{ ...btn, color: debug ? '#f9d94e' : '#4b5563', borderColor: debug ? '#f9d94e44' : 'transparent', background: 'none' }}
-        >
-          DEBUG
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setDebug(d => !d)}
+            style={{ ...btn, color: debug ? '#f9d94e' : '#4b5563', borderColor: debug ? '#f9d94e44' : 'transparent', background: 'none' }}
+          >
+            DEBUG
+          </button>
+        )}
       </div>
 
       {/* 캔버스 */}

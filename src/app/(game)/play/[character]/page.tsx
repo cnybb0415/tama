@@ -23,6 +23,7 @@ export default async function PlayPage({ params }: Props) {
     .single()
 
   const save = (data?.save_data as SaveData) ?? null
+  const username = (user.user_metadata?.username as string) ?? ''
 
-  return <PlayClient characterType={character} initialSave={save} />
+  return <PlayClient characterType={character} initialSave={save} isAdmin={username === 'admin'} />
 }
