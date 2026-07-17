@@ -1,0 +1,119 @@
+'use client'
+
+import { useEffect, useRef, useCallback } from 'react'
+import { GameEngine } from '@/lib/game/engine'
+import { CharacterImages } from '@/lib/game/character'
+import { GameRenderer } from '@/lib/game/renderer'
+import { LOGICAL_W, LOGICAL_H } from '@/lib/game/config'
+import type { SaveData } from '@/lib/game/types'
+
+interface Props {
+  characterType: string
+  initialSave: SaveData | null
+  onSave: (data: SaveData) => void
+}
+
+export default function GameCanvas({ characterType, initialSave, onSave }: Props) {
+  const canvasRef   = useRef<HTMLCanvasElement>(null)
+  const engineRef   = useRef<GameEngine | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    let rafId = 0
+
+    async function run() {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      // ctx is non-null from here
+      const ctx2d = ctx as CanvasRenderingContext2D
+
+      const renderer = new GameRenderer()
+      renderer.characterType = characterType
+      try { await renderer.loadAssets() } catch (e) { console.error('loadAssets:', e) }
+      if (cancelled) return
+
+      const images = new CharacterImages()
+      try { await images.loadStage(characterType, 0) } catch (e) { console.error('loadStage:', e) }
+      if (cancelled) return
+
+      const engine = new GameEngine(characterType, images)
+      engine.onSave = onSave
+      engine.onEvolve = async (stage) => { await images.loadStage(characterType, stage) }
+      if (initialSave) engine.loadSave(initialSave)
+      engineRef.current = engine
+
+      // 각 인스턴스마다 독립된 lastTime (공유 ref 사용 안 함)
+      let lastTime = performance.now()
+
+      function loop(time: number) {
+        if (cancelled) return
+        const dt = Math.min((time - lastTime) / 1000, 0.1)
+        lastTime = time
+        engine.update(dt)
+        try { renderer.draw(ctx2d, engine.state, engine.anim, images) }
+        catch (e) { console.error('draw:', e) }
+        rafId = requestAnimationFrame(loop)
+      }
+      rafId = requestAnimationFrame(loop)
+    }
+
+    run()
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(rafId)
+      engineRef.current = null
+    }
+  }, [characterType, initialSave, onSave])
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      const eng = engineRef.current
+      if (!eng) return
+      if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') { eng.btnLeft();   return }
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { eng.btnRight();  return }
+      if (e.key === ' '          || e.key === 's' || e.key === 'S') { e.preventDefault(); eng.btnCenter() }
+    }
+    window.addEventListener('keydown', down)
+    return () => window.removeEventListener('keydown', down)
+  }, [])
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    const eng = engineRef.current
+    if (!canvas || !eng) return
+    const rect = canvas.getBoundingClientRect()
+    const lx = (e.clientX - rect.left) * (LOGICAL_W / rect.width)
+    const ly = (e.clientY - rect.top)  * (LOGICAL_H / rect.height)
+    if (lx >= 190 && lx <= 225 && ly >= 357 && ly <= 400) { eng.btnLeft();   return }
+    if (lx >= 241 && lx <= 275 && ly >= 371 && ly <= 400) { eng.btnCenter(); return }
+    if (lx >= 291 && lx <= 327 && ly >= 364 && ly <= 400) { eng.btnRight();  return }
+  }, [])
+
+  const handleTouch = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+    const canvas = canvasRef.current
+    const eng = engineRef.current
+    if (!canvas || !eng) return
+    const touch = e.changedTouches[0]
+    const rect  = canvas.getBoundingClientRect()
+    const lx = (touch.clientX - rect.left) * (LOGICAL_W / rect.width)
+    const ly = (touch.clientY - rect.top)  * (LOGICAL_H / rect.height)
+    if (lx >= 190 && lx <= 225 && ly >= 357 && ly <= 400) { eng.btnLeft();   return }
+    if (lx >= 241 && lx <= 275 && ly >= 371 && ly <= 400) { eng.btnCenter(); return }
+    if (lx >= 291 && lx <= 327 && ly >= 364 && ly <= 400) { eng.btnRight();  return }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={LOGICAL_W}
+      height={LOGICAL_H}
+      onClick={handleClick}
+      onTouchStart={handleTouch}
+      style={{ display: 'block', width: '100%', maxWidth: 444, height: 'auto', cursor: 'pointer' }}
+    />
+  )
+}

@@ -1,0 +1,28 @@
+import { redirect, notFound } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase/server'
+import { CHARACTER_CONFIGS } from '@/lib/game/config'
+import PlayClient from './PlayClient'
+import type { SaveData } from '@/lib/game/types'
+
+interface Props { params: Promise<{ character: string }> }
+
+export default async function PlayPage({ params }: Props) {
+  const { character } = await params
+
+  if (!CHARACTER_CONFIGS[character]) notFound()
+
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data } = await supabase
+    .from('game_saves')
+    .select('save_data')
+    .eq('user_id', user.id)
+    .eq('character_type', character)
+    .single()
+
+  const save = (data?.save_data as SaveData) ?? null
+
+  return <PlayClient characterType={character} initialSave={save} />
+}
