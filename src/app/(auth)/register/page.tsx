@@ -72,19 +72,20 @@ export default function RegisterPage() {
         {/* 뒤로가기 — 타마고치 왼쪽 위 */}
         <Link href="/login" style={{
           position: 'absolute', top: '4%', left: '3%', zIndex: 5,
-          fontSize: 10, color: '#aaa', textDecoration: 'none',
+          fontSize: 10, color: '#e5e7eb', textDecoration: 'none',
           fontFamily: 'Galmuri9, sans-serif',
+          background: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: 3,
         }}>
-          ←
+          ← {lang === 'ko' ? '로그인' : 'Login'}
         </Link>
 
         {/* 언어 토글 — 타마고치 오른쪽 위 */}
-        <div style={{ position: 'absolute', top: '4%', right: '3%', display: 'flex', gap: 2, zIndex: 5 }}>
+        <div style={{ position: 'absolute', top: '4%', right: '3%', zIndex: 5, display: 'flex', gap: 2, background: 'rgba(0,0,0,0.45)', borderRadius: 3, padding: '1px 4px' }}>
           {(['ko', 'en'] as Lang[]).map(l => (
             <button key={l} onClick={() => setLang(l)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+              background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px',
               fontSize: 10, fontFamily: 'Galmuri9, sans-serif',
-              color: lang === l ? '#ccc' : '#555',
+              color: lang === l ? '#fff' : 'rgba(255,255,255,0.4)',
               fontWeight: lang === l ? 700 : 400,
             }}>{l.toUpperCase()}</button>
           ))}

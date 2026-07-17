@@ -52,16 +52,16 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 상단 — 캔버스에 overlaid */}
-        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <Link href="/select" style={{ fontSize: 10, color: '#888', fontFamily: 'Galmuri9, sans-serif', textDecoration: 'none' }}>
+        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <Link href="/select" style={{ fontSize: 10, color: '#fff', fontFamily: 'Galmuri9, sans-serif', textDecoration: 'none', background: 'rgba(0,0,0,0.45)', padding: '1px 6px', borderRadius: 3 }}>
             ← {t.characters}
           </Link>
-          <span style={{ display: 'flex', gap: 2 }}>
+          <span style={{ display: 'flex', gap: 2, background: 'rgba(0,0,0,0.45)', borderRadius: 3, padding: '1px 4px' }}>
             {(['ko', 'en'] as Lang[]).map(l => (
               <button key={l} onClick={() => setLang(l)} style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px',
                 fontSize: 9, fontFamily: 'Galmuri9, sans-serif',
-                color: lang === l ? '#ccc' : '#555',
+                color: lang === l ? '#fff' : 'rgba(255,255,255,0.4)',
                 fontWeight: lang === l ? 700 : 400,
               }}>{l.toUpperCase()}</button>
             ))}
@@ -69,7 +69,7 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
           {isAdmin && (
             <button
               onClick={() => setDebug(d => !d)}
-              style={{ ...btn, fontSize: 9, padding: '1px 4px', color: debug ? '#f9d94e' : '#555', borderColor: debug ? '#f9d94e44' : 'transparent', background: 'none' }}
+              style={{ ...btn, fontSize: 9, padding: '1px 4px', background: 'rgba(0,0,0,0.45)', border: 'none', color: debug ? '#f9d94e' : 'rgba(255,255,255,0.4)' }}
             >
               DEBUG
             </button>
@@ -86,7 +86,7 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
 
         {/* 하단 힌트 — 캔버스에 overlaid */}
         <div style={{ position: 'absolute', bottom: '2%', left: 0, right: 0, zIndex: 5, textAlign: 'center' }}>
-          <p style={{ fontSize: 9, color: '#555', margin: 0, fontFamily: 'Galmuri9, sans-serif' }}>{t.ctrlsPlay}</p>
+          <p style={{ fontSize: 9, color: '#fff', margin: 0, fontFamily: 'Galmuri9, sans-serif', display: 'inline-block', background: 'rgba(0,0,0,0.45)', padding: '1px 8px', borderRadius: 3 }}>{t.ctrlsPlay}</p>
         </div>
 
         {/* 디버그 패널 */}

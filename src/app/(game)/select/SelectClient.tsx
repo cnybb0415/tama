@@ -96,14 +96,14 @@ export default function SelectClient({ username }: Props) {
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 유저명 + 언어 토글 — 타마고치 위 */}
-        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <span style={{ fontSize: 10, color: '#888', fontFamily: 'Galmuri9, sans-serif' }}>{username}</span>
-          <span style={{ display: 'flex', gap: 2 }}>
+        <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 10, color: '#fff', fontFamily: 'Galmuri9, sans-serif', background: 'rgba(0,0,0,0.45)', padding: '1px 6px', borderRadius: 3 }}>{username}</span>
+          <span style={{ display: 'flex', gap: 2, background: 'rgba(0,0,0,0.45)', borderRadius: 3, padding: '1px 4px' }}>
             {(['ko', 'en'] as Lang[]).map(l => (
               <button key={l} onClick={() => setLang(l)} style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px',
                 fontSize: 9, fontFamily: 'Galmuri9, sans-serif',
-                color: lang === l ? '#ccc' : '#555',
+                color: lang === l ? '#fff' : 'rgba(255,255,255,0.4)',
                 fontWeight: lang === l ? 700 : 400,
               }}>{l.toUpperCase()}</button>
             ))}
@@ -251,24 +251,24 @@ export default function SelectClient({ username }: Props) {
         ))}
         {/* 로그아웃/탈퇴 — 타마고치 하단 */}
         <div style={{ position: 'absolute', bottom: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          <p style={{ fontSize: 9, color: '#666', margin: 0, fontFamily: 'Galmuri9, sans-serif' }}>{t.controls}</p>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button onClick={logout} style={{ fontSize: 10, color: '#666', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
+          <p style={{ fontSize: 9, color: '#fff', margin: 0, fontFamily: 'Galmuri9, sans-serif', background: 'rgba(0,0,0,0.45)', padding: '1px 8px', borderRadius: 3 }}>{t.controls}</p>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(0,0,0,0.45)', padding: '2px 10px', borderRadius: 3 }}>
+            <button onClick={logout} style={{ fontSize: 10, color: '#e5e7eb', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
               {t.logout}
             </button>
-            <span style={{ color: '#555' }}>·</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
             {confirmDel ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontFamily: 'Galmuri9, sans-serif' }}>
-                <span style={{ color: '#dc2626' }}>{t.deleteConfirm}</span>
-                <button onClick={deleteAccount} disabled={deleting} style={{ color: '#ef4444', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}>
+                <span style={{ color: '#fca5a5' }}>{t.deleteConfirm}</span>
+                <button onClick={deleteAccount} disabled={deleting} style={{ color: '#f87171', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', opacity: deleting ? 0.5 : 1 }}>
                   {deleting ? '...' : t.confirm}
                 </button>
-                <button onClick={() => setConfirmDel(false)} style={{ color: '#555', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button onClick={() => setConfirmDel(false)} style={{ color: '#e5e7eb', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
                   {t.cancel}
                 </button>
               </span>
             ) : (
-              <button onClick={() => setConfirmDel(true)} style={{ fontSize: 10, color: '#555', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
+              <button onClick={() => setConfirmDel(true)} style={{ fontSize: 10, color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
                 {t.deleteAcct}
               </button>
             )}
