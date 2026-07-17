@@ -18,8 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        padding: '24px 16px',
-        boxSizing: 'border-box',
+        padding: '24px 0',
       }}>
         {children}
       </div>

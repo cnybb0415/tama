@@ -4,11 +4,15 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
+import { useLang } from '@/hooks/useLang'
+import { setLang } from '@/lib/lang'
+import type { Lang } from '@/lib/lang'
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
 
 export default function LoginPage() {
   const router = useRouter()
+  const { lang, t } = useLang()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
@@ -44,7 +48,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: 444 }}>
+    <div style={{ width: '100%', maxWidth: 444, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* 언어 토글 */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+        <div style={{ display: 'flex', gap: 4, fontSize: 11 }}>
+          {(['ko', 'en'] as Lang[]).map(l => (
+            <button key={l} onClick={() => setLang(l)} style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+              color: lang === l ? '#9ca3af' : '#4b5563',
+              fontWeight: lang === l ? 700 : 400,
+            }}>{l.toUpperCase()}</button>
+          ))}
+        </div>
+      </div>
       <div style={{ position: 'relative', width: '100%' }}>
 
         {/* 스크린 안 배경 — 게임과 동일한 background.png (하늘+구름) */}
@@ -83,9 +99,9 @@ export default function LoginPage() {
             zIndex: 3,
             display: 'flex',
             flexDirection: 'column',
-            padding: '8px 7px 6px',
+            padding: '5px 7px 4px',
             boxSizing: 'border-box',
-            gap: 4,
+            gap: 2,
             overflow: 'hidden',
           }}
         >
@@ -155,19 +171,6 @@ export default function LoginPage() {
             {loading ? '...' : 'LOG IN'}
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: 'auto' }}>
-            <Link
-              href="/register"
-              style={{
-                fontSize: 8,
-                fontFamily: 'Galmuri9, sans-serif',
-                color: 'rgba(255,255,255,0.65)',
-                textDecoration: 'none',
-              }}
-            >
-              Sign up
-            </Link>
-          </div>
         </form>
 
         {/* 타마고치 바디 — transparent screen으로 폼 노출, 클릭 통과 */}
@@ -182,6 +185,14 @@ export default function LoginPage() {
             pointerEvents: 'none',
           }}
         />
+      </div>
+
+      {/* 회원가입 링크 */}
+      <div style={{ marginTop: 14, fontSize: 12, color: '#4b5563' }}>
+        {lang === 'ko' ? '계정이 없으신가요? ' : "Don't have an account? "}
+        <Link href="/register" style={{ color: '#9ca3af', textDecoration: 'underline' }}>
+          {lang === 'ko' ? '회원가입' : 'Sign up'}
+        </Link>
       </div>
     </div>
   )

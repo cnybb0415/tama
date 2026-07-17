@@ -120,9 +120,9 @@ export default function RegisterPage() {
             zIndex: 3,
             display: 'flex',
             flexDirection: 'column',
-            padding: '6px 7px 5px',
+            padding: '5px 7px 4px',
             boxSizing: 'border-box',
-            gap: 3,
+            gap: 2,
             overflow: 'hidden',
           }}
         >
@@ -204,19 +204,6 @@ export default function RegisterPage() {
             {loading ? '...' : 'SIGN UP'}
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: 'auto' }}>
-            <Link
-              href="/login"
-              style={{
-                fontSize: 8,
-                fontFamily: 'Galmuri9, sans-serif',
-                color: 'rgba(255,255,255,0.65)',
-                textDecoration: 'none',
-              }}
-            >
-              Log in
-            </Link>
-          </div>
         </form>
 
         {/* 타마고치 바디 */}

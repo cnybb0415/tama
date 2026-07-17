@@ -8,12 +8,12 @@ import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
 
 const CHARACTERS = [
-  { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/adult/idle_01.png',     available: true },
-  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/adult/idle_01.png',      available: true },
-  { id: 'chanyeol', name: 'CHANYEOL', idleImg: '/picture/exo/chanyeol/adult/idle_01.png', available: true },
-  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/adult/idle_01.png',       available: true },
-  { id: 'kai',      name: 'KAI',      idleImg: '/picture/exo/kai/adult/idle_01.png',      available: true },
-  { id: 'sehun',    name: 'SEHUN',    idleImg: '/picture/exo/sehun/adult/idle_01.png',    available: true },
+  { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/kid/suho_kid_idle_01.png',         available: true },
+  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/kid/idle_01.png',                   available: true },
+  { id: 'chanyeol', name: 'CHANYEOL', idleImg: '/picture/exo/chanyeol/kid/chanyeol_kid_idle_01.png', available: true },
+  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/kid/dio_kid_idle_01.png',            available: true },
+  { id: 'kai',      name: 'KAI',      idleImg: '/picture/exo/kai/kid/kai_kid_idle_01.png',           available: true },
+  { id: 'sehun',    name: 'SEHUN',    idleImg: '/picture/exo/sehun/kid/sehun_kid_idle_01.png',       available: true },
 ]
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
