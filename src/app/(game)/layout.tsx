@@ -15,7 +15,10 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
         zIndex: 1,
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'center',
         minHeight: '100vh',
+        padding: '0 16px',
+        boxSizing: 'border-box',
       }}>
         {children}
       </div>

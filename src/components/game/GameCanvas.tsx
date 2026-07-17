@@ -22,8 +22,9 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
   { characterType, initialSave, onSave },
   ref,
 ) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const engineRef = useRef<GameEngine | null>(null)
+  const canvasRef    = useRef<HTMLCanvasElement>(null)
+  const engineRef    = useRef<GameEngine | null>(null)
+  const lastTouchRef = useRef(0)
 
   useImperativeHandle(ref, () => ({
     debugAnim: (name: AnimName) => engineRef.current?.debugAnim(name),
@@ -91,31 +92,37 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
     return () => window.removeEventListener('keydown', down)
   }, [])
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
+  const hitBtn = useCallback((lx: number, ly: number) => {
     const eng = engineRef.current
-    if (!canvas || !eng) return
-    const rect = canvas.getBoundingClientRect()
-    const lx = (e.clientX - rect.left) * (LOGICAL_W / rect.width)
-    const ly = (e.clientY - rect.top)  * (LOGICAL_H / rect.height)
+    if (!eng) return
     if (lx >= 190 && lx <= 225 && ly >= 357 && ly <= 400) { eng.btnLeft();   return }
     if (lx >= 241 && lx <= 275 && ly >= 371 && ly <= 400) { eng.btnCenter(); return }
     if (lx >= 291 && lx <= 327 && ly >= 364 && ly <= 400) { eng.btnRight();  return }
   }, [])
 
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastTouchRef.current < 500) return  // 터치 후 합성 click 무시
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    hitBtn(
+      (e.clientX - rect.left) * (LOGICAL_W / rect.width),
+      (e.clientY - rect.top)  * (LOGICAL_H / rect.height),
+    )
+  }, [hitBtn])
+
   const handleTouch = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault()
+    lastTouchRef.current = Date.now()
     const canvas = canvasRef.current
-    const eng = engineRef.current
-    if (!canvas || !eng) return
+    if (!canvas) return
     const touch = e.changedTouches[0]
     const rect  = canvas.getBoundingClientRect()
-    const lx = (touch.clientX - rect.left) * (LOGICAL_W / rect.width)
-    const ly = (touch.clientY - rect.top)  * (LOGICAL_H / rect.height)
-    if (lx >= 190 && lx <= 225 && ly >= 357 && ly <= 400) { eng.btnLeft();   return }
-    if (lx >= 241 && lx <= 275 && ly >= 371 && ly <= 400) { eng.btnCenter(); return }
-    if (lx >= 291 && lx <= 327 && ly >= 364 && ly <= 400) { eng.btnRight();  return }
-  }, [])
+    hitBtn(
+      (touch.clientX - rect.left) * (LOGICAL_W / rect.width),
+      (touch.clientY - rect.top)  * (LOGICAL_H / rect.height),
+    )
+  }, [hitBtn])
 
   return (
     <canvas
@@ -124,7 +131,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
       height={LOGICAL_H}
       onClick={handleClick}
       onTouchStart={handleTouch}
-      style={{ display: 'block', width: '100%', maxWidth: 444, height: 'auto', cursor: 'pointer' }}
+      style={{ display: 'block', width: '100%', maxWidth: 444, height: 'auto', cursor: 'pointer', touchAction: 'none' }}
     />
   )
 })

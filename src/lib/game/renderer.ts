@@ -251,8 +251,7 @@ export class GameRenderer {
       const sy = SCREEN.y + 10
 
       if (isSel) {
-        ctx.fillStyle = 'rgba(230,230,230,1)'
-        roundRect(ctx, sx - 9, sy - 9, 18, 18, 3)
+        roundRect(ctx, sx - 9, sy - 9, 18, 18, 3, 'rgba(230,230,230,1)')
       }
       this._menuIcon(ctx, MENU_ITEMS[idx], sx, sy, isSel ? '#141414' : '#a0a0a0')
     }
