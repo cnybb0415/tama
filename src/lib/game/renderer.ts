@@ -1,7 +1,7 @@
 import { SCREEN, BTN, COLOR, MENU_ITEMS, toCSS, LOGICAL_W, LOGICAL_H } from './config'
 import { CHARACTER_CONFIGS } from './config'
 import { getLang } from '../lang'
-import { T } from '../i18n'
+import { T, CHARACTER_DIALOGUE } from '../i18n'
 import type { CharacterAnim, CharacterImages } from './character'
 import type { GameState } from './types'
 
@@ -66,6 +66,8 @@ export class GameRenderer {
         this._drawMenu(ctx, state.menuIndex)
       } else if (state.showStatus) {
         this._drawStatusPanel(ctx, stats, state.stage)
+      } else if (state.dialogueTier !== null) {
+        this._drawDialogue(ctx, state)
       } else {
         this._drawPoopPiles(ctx, stats.poop_count)
         this._drawHud(ctx, stats)
@@ -120,8 +122,8 @@ export class GameRenderer {
     }
   }
 
-  private _heart(ctx: CanvasRenderingContext2D, x: number, y: number, filled: boolean): void {
-    const c = toCSS(filled ? COLOR.HEART_ON : COLOR.HEART_OFF)
+  private _heart(ctx: CanvasRenderingContext2D, x: number, y: number, filled: boolean, onColor: readonly number[] = COLOR.HEART_ON): void {
+    const c = toCSS(filled ? onColor : COLOR.HEART_OFF)
     ctx.fillStyle = c
     circle(ctx, x + 3, y + 4, 4)
     circle(ctx, x + 9, y + 4, 4)
@@ -154,21 +156,28 @@ export class GameRenderer {
 
     const stageName = CHARACTER_CONFIGS[this.characterType]?.stages[stage]?.name ?? ''
     ctx.fillStyle = '#ddd'; ctx.font = KO_FONT; ctx.textAlign = 'center'
-    ctx.fillText(`◆ ${stageName}`, cx, y + 10); y += 16
-    hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 6
+    ctx.fillText(`◆ ${stageName}`, cx, y + 9); y += 14
+    hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 5
 
     // Hearts
     ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
-    ctx.fillText(this._t.hunger, sx + 6, y + 10)
+    ctx.fillText(this._t.hunger, sx + 6, y + 9)
     for (let i = 0; i < 4; i++) this._heart(ctx, sx + 52 + i * 17, y, i < stats.hunger)
-    y += 20
+    y += 18
 
     // Faces
-    ctx.fillText(this._t.happy, sx + 6, y + 10)
+    ctx.fillText(this._t.happy, sx + 6, y + 9)
     for (let i = 0; i < 4; i++) this._face(ctx, sx + 52 + i * 17, y, i < stats.happiness)
-    y += 22
+    y += 18
 
-    hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 6
+    // Affinity (친밀도) — 0~100을 4칸 하트로 환산
+    ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
+    ctx.fillText(this._t.affinity, sx + 6, y + 9)
+    const affPips = Math.floor(stats.affinity / 25)
+    for (let i = 0; i < 4; i++) this._heart(ctx, sx + 52 + i * 17, y, i < affPips, COLOR.AFFINITY_ON)
+    y += 18
+
+    hline(ctx, sx + 5, SCREEN.x + SCREEN.w - 5, y, '#444'); y += 5
 
     const t = this._t
     const rows: [string, string, string][] = [
@@ -179,10 +188,10 @@ export class GameRenderer {
     ]
     for (const [label, value, vc] of rows) {
       ctx.fillStyle = '#888'; ctx.textAlign = 'left'; ctx.font = KO_FONT
-      ctx.fillText(label, sx + 8, y + 10)
+      ctx.fillText(label, sx + 8, y + 9)
       ctx.fillStyle = vc; ctx.textAlign = 'right'
-      ctx.fillText(value, SCREEN.x + SCREEN.w - 8, y + 10)
-      y += 17
+      ctx.fillText(value, SCREEN.x + SCREEN.w - 8, y + 9)
+      y += 15
     }
 
     ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.font = SM_FONT
@@ -294,7 +303,102 @@ export class GameRenderer {
       ctx.beginPath(); ctx.moveTo(cx + 1, cy + 4); ctx.lineTo(cx + 1, cy - 5)
       ctx.lineTo(cx + 6, cy - 3); ctx.stroke()
       circle(ctx, cx + 6, cy - 2, 2)
+    } else if (kind === 'talk') {
+      roundRect(ctx, cx - 6, cy - 5, 12, 8, 2, c)
+      ctx.fillStyle = c
+      poly(ctx, [[cx - 3, cy + 3], [cx, cy + 3], [cx - 2, cy + 7]])
     }
+  }
+
+  // ── Dialogue (친밀도 대화) ─────────────────────────────────────────────────
+
+  private _drawDialogue(ctx: CanvasRenderingContext2D, state: GameState): void {
+    const tier = state.dialogueTier ?? 0
+    const category = state.dialogueCategory
+    const charSet = CHARACTER_DIALOGUE[this.characterType]?.[getLang()]
+    const lines = charSet?.[category]?.[tier] ?? this._t.dialogue[category]?.[tier] ?? this._t.dialogue.talk[0]
+    const text = lines[state.dialogueLineIndex % lines.length] ?? '...'
+
+    const bw = SCREEN.w * 0.85
+    const bh = 48
+    const bx = SCREEN.x + (SCREEN.w - bw) / 2
+    const by = SCREEN.y + 3
+    const r = 11
+    const tailCx = bx + bw / 2
+
+    const bubblePath = () => {
+      ctx.beginPath()
+      ctx.roundRect(bx, by, bw, bh, r)
+      ctx.moveTo(tailCx - 7, by + bh - 1)
+      ctx.lineTo(tailCx, by + bh + 9)
+      ctx.lineTo(tailCx + 7, by + bh - 1)
+      ctx.closePath()
+    }
+
+    // 그림자 + 파스텔 그라데이션 바디 (Y2K 홀로그램 느낌, 반투명이라 캐릭터가 비쳐 보임)
+    ctx.save()
+    ctx.shadowColor = 'rgba(150,60,190,0.45)'
+    ctx.shadowBlur = 5
+    ctx.shadowOffsetY = 3
+    bubblePath()
+    const grad = ctx.createLinearGradient(bx, by, bx, by + bh)
+    grad.addColorStop(0,    'rgba(255,224,251,0.62)')
+    grad.addColorStop(0.55, 'rgba(227,210,255,0.62)')
+    grad.addColorStop(1,    'rgba(205,238,255,0.62)')
+    ctx.fillStyle = grad
+    ctx.fill()
+    ctx.restore()
+
+    // 통통한 마젠타 테두리
+    ctx.lineWidth = 2
+    ctx.strokeStyle = '#ff6fd8'
+    ctx.lineJoin = 'round'
+    bubblePath()
+    ctx.stroke()
+
+    // 글로시 하이라이트 (스티커 광택)
+    ctx.save()
+    ctx.beginPath()
+    ctx.roundRect(bx, by, bw, bh, r)
+    ctx.clip()
+    ctx.fillStyle = 'rgba(255,255,255,0.55)'
+    ctx.beginPath()
+    ctx.ellipse(bx + bw * 0.3, by + 6, bw * 0.35, 7, -0.15, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.restore()
+
+    // 반짝이 장식
+    this._sparkle(ctx, bx + bw - 9, by + 7, 4, '#7fe0ff')
+    this._sparkle(ctx, bx + 9, by + bh - 8, 3, '#ffd36e')
+
+    // 텍스트 (흰 테두리 + 진보라 채움)
+    ctx.font = KO_FONT
+    ctx.textAlign = 'center'
+    ctx.lineWidth = 3
+    ctx.lineJoin = 'round'
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+    ctx.fillStyle = '#4a2560'
+    wrapText(ctx, text, tailCx, by + bh / 2 - 4, bw - 16, 13, { stroke: true })
+
+    ctx.fillStyle = 'rgba(90,50,120,0.6)'
+    ctx.font = SM_FONT
+    ctx.fillText(this._t.sClose, tailCx, by + bh - 6)
+    ctx.textAlign = 'left'
+  }
+
+  private _sparkle(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string): void {
+    ctx.fillStyle = color
+    ctx.beginPath()
+    ctx.moveTo(x, y - size)
+    ctx.lineTo(x + size * 0.35, y - size * 0.35)
+    ctx.lineTo(x + size, y)
+    ctx.lineTo(x + size * 0.35, y + size * 0.35)
+    ctx.lineTo(x, y + size)
+    ctx.lineTo(x - size * 0.35, y + size * 0.35)
+    ctx.lineTo(x - size, y)
+    ctx.lineTo(x - size * 0.35, y - size * 0.35)
+    ctx.closePath()
+    ctx.fill()
   }
 
   // ── Minigame ────────────────────────────────────────────────────────────
@@ -440,6 +544,32 @@ function overlay(
 ): void {
   ctx.fillStyle = `rgba(${r},${g},${b},${alpha / 255})`
   ctx.fillRect(rect.x, rect.y, rect.w, rect.h)
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string, cx: number, cy: number, maxWidth: number, lineHeight: number,
+  opts?: { stroke?: boolean }
+): void {
+  const words = text.split(' ')
+  const lines: string[] = []
+  let line = ''
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w
+    if (line && ctx.measureText(test).width > maxWidth) {
+      lines.push(line)
+      line = w
+    } else {
+      line = test
+    }
+  }
+  if (line) lines.push(line)
+  const startY = cy - ((lines.length - 1) * lineHeight) / 2
+  lines.forEach((l, i) => {
+    const ly = startY + i * lineHeight
+    if (opts?.stroke) ctx.strokeText(l, cx, ly)
+    ctx.fillText(l, cx, ly)
+  })
 }
 
 async function loadImg(src: string): Promise<HTMLImageElement> {

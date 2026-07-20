@@ -10,6 +10,7 @@ import type { AnimName, SaveData } from '@/lib/game/types'
 export interface GameCanvasHandle {
   debugAnim: (name: AnimName) => void
   debugStage: (stage: number) => void
+  debugAffinity: (value: number) => void
 }
 
 interface Props {
@@ -29,6 +30,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
   useImperativeHandle(ref, () => ({
     debugAnim: (name: AnimName) => engineRef.current?.debugAnim(name),
     debugStage: (stage: number) => { engineRef.current?.debugStage(stage) },
+    debugAffinity: (value: number) => engineRef.current?.debugAffinity(value),
   }))
 
   useEffect(() => {

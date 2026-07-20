@@ -10,7 +10,7 @@ create table if not exists game_saves (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
   character_type text not null,
-  save_data jsonb not null default '{"stats":{"hunger":4,"happiness":4,"age":0,"weight":10,"sick":false,"poop_count":0,"alive":true},"last_hunger_decay":0,"last_happiness_decay":0,"poop_timer":null,"last_day":0}',
+  save_data jsonb not null default '{"stats":{"hunger":4,"happiness":4,"affinity":0,"age":0,"weight":10,"sick":false,"poop_count":0,"alive":true},"last_hunger_decay":0,"last_happiness_decay":0,"poop_timer":null,"created_at":null}',
   updated_at timestamptz default now(),
   unique(user_id, character_type)
 );

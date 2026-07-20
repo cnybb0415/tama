@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import type { SaveData, AnimName } from '@/lib/game/types'
+import { AFFINITY_TIERS } from '@/lib/game/config'
 import type { GameCanvasHandle } from '@/components/game/GameCanvas'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
@@ -107,6 +108,12 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
             <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.stageLabel}</div>
             <button style={btn} onClick={() => gameRef.current?.debugStage(0)}>{t.kid}</button>
             <button style={btn} onClick={() => gameRef.current?.debugStage(1)}>{t.adult}</button>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
+            <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.affinity}</div>
+            {AFFINITY_TIERS.map(v => (
+              <button key={v} style={btn} onClick={() => gameRef.current?.debugAffinity(v)}>{v}</button>
+            ))}
+            <button style={btn} onClick={() => gameRef.current?.debugAffinity(100)}>100</button>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
             <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.animLabel}</div>
             {ANIMS.map(a => (

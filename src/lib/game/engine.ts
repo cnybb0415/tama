@@ -1,6 +1,6 @@
-import { MENU_ITEMS } from './config'
-import { CharacterAnim, CharacterImages, stageForAge } from './character'
-import type { AnimName, GameStats, GameState, SaveData } from './types'
+import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE } from './config'
+import { CharacterAnim, CharacterImages, stageForAge, affinityTier } from './character'
+import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from './types'
 
 const HUNGER_DECAY  = 30 * 60
 const HAP_DECAY     = 45 * 60
@@ -18,7 +18,7 @@ export class GameEngine {
   anim: CharacterAnim
 
   stats: GameStats = {
-    hunger: 4, happiness: 4, age: 0, weight: 10,
+    hunger: 4, happiness: 4, affinity: 0, age: 0, weight: 10,
     sick: false, poop_count: 0, alive: true,
   }
 
@@ -39,6 +39,10 @@ export class GameEngine {
     deathTimer: 0,
     btnFlash: { left: 0, center: 0, right: 0 },
     evolveFlash: 0,
+    dialogueTier: null,
+    dialogueCategory: 'talk',
+    dialogueLineIndex: 0,
+    dialogueTimer: 0,
   }
 
   private lastHungerDecay = Date.now() / 1000
@@ -50,7 +54,13 @@ export class GameEngine {
   private sickSince: number | null = null
   private walkTimer = 0
   private walkInterval = rand(WALK_MIN, WALK_MAX)
-  private lastDay = new Date().getDate()
+  // 캐릭터가 생성된 시각(epoch, 초) — 나이는 여기서부터 실제 경과 일수로 계산됨
+  // (달력상 "일자"가 바뀌었는지만 보던 예전 방식은 앱을 며칠간 열지 않으면
+  //  경과일을 하루로만 세는 버그가 있었음 — 실제 경과 시간 기반으로 교체)
+  private createdAt = Date.now() / 1000
+  private idleChatTimer = 0
+  private idleChatInterval = rand(IDLE_CHAT_MIN, IDLE_CHAT_MAX)
+  private greeted = false
 
   onSave?: (data: SaveData) => void
   onEvolve?: (stage: number) => void
@@ -63,10 +73,12 @@ export class GameEngine {
 
   loadSave(data: SaveData): void {
     this.stats = data.stats
+    if (this.stats.affinity == null) this.stats.affinity = 0
     this.lastHungerDecay = data.last_hunger_decay || Date.now() / 1000
     this.lastHapDecay    = data.last_happiness_decay || Date.now() / 1000
     this.poopTimer       = data.poop_timer ?? null
-    this.lastDay         = data.last_day || new Date().getDate()
+    // 예전 저장 데이터(created_at 없음)는 현재 age를 유지하도록 역산해서 채워줌
+    this.createdAt = data.created_at ?? (Date.now() / 1000 - this.stats.age * 86400)
     // death timers reset (no offline death)
     this.hungerZeroSince = null
     this.hapZeroSince    = null
@@ -83,7 +95,7 @@ export class GameEngine {
       last_hunger_decay: this.lastHungerDecay,
       last_happiness_decay: this.lastHapDecay,
       poop_timer: this.poopTimer,
-      last_day: this.lastDay,
+      created_at: this.createdAt,
     }
   }
 
@@ -101,11 +113,16 @@ export class GameEngine {
       return
     }
 
-    // Age
-    const today = new Date().getDate()
-    if (today !== this.lastDay) {
-      this.stats.age++
-      this.lastDay = today
+    // 접속 시 캐릭터가 먼저 인사 (세션당 한 번)
+    if (!this.greeted) {
+      this.greeted = true
+      this._startDialogue('greet')
+    }
+
+    // Age — 생성 시점부터 실제 경과 시간을 기준으로 계산 (앱을 며칠 안 열어도 정확히 반영됨)
+    const newAge = Math.max(0, Math.floor((now - this.createdAt) / 86400))
+    if (newAge !== this.stats.age) {
+      this.stats.age = newAge
       const newStage = stageForAge(this.stats.age, this.characterType)
       if (newStage !== this.state.stage) {
         this.state.stage = newStage
@@ -132,10 +149,10 @@ export class GameEngine {
     if (this.poopTimer !== null && now >= this.poopTimer) {
       this.stats.poop_count++
       this.poopTimer = null
-      this.anim.request('poop')
       if (this.stats.poop_count >= 2 && !this.stats.sick) {
         this.stats.sick = true
         this.sickSince = now
+        this._startDialogue('sick')
       }
     }
 
@@ -170,6 +187,10 @@ export class GameEngine {
       this.state.minigameResultTimer -= dt
       if (this.state.minigameResultTimer <= 0) this.state.minigameActive = false
     }
+    if (this.state.dialogueTier !== null) {
+      this.state.dialogueTimer -= dt
+      if (this.state.dialogueTimer <= 0) this.state.dialogueTier = null
+    }
 
     // Walk
     if (!this.state.menuOpen && !this.state.minigameActive) {
@@ -178,6 +199,17 @@ export class GameEngine {
         this.walkTimer = 0
         this.walkInterval = rand(WALK_MIN, WALK_MAX)
         this.anim.request('walk')
+      }
+    }
+
+    // 캐릭터가 먼저 말 거는 잡담 — 친밀도가 높을수록 더 자주 말을 검
+    if (!this.state.menuOpen && !this.state.minigameActive && !this.state.showStatus && this.state.dialogueTier === null) {
+      this.idleChatTimer += dt
+      if (this.idleChatTimer >= this.idleChatInterval) {
+        this.idleChatTimer = 0
+        const tier = affinityTier(this.stats.affinity)
+        this.idleChatInterval = rand(IDLE_CHAT_MIN, IDLE_CHAT_MAX) - tier * 20
+        this._startDialogue('idle')
       }
     }
 
@@ -210,6 +242,7 @@ export class GameEngine {
       this.state.btnFlash.center = 0.15; return
     }
     if (this.state.showStatus) { this.state.showStatus = false; return }
+    if (this.state.dialogueTier !== null) { this.state.dialogueTier = null; return }
     if (this.state.menuOpen) this._select()
     else this.state.menuOpen = true
     this.state.btnFlash.center = 0.15
@@ -232,13 +265,17 @@ export class GameEngine {
     if (item === 'feed') {
       this.stats.hunger = Math.min(4, this.stats.hunger + 1)
       this.stats.weight++
+      this._bumpAffinity(1)
       this._schedulePoop()
       this.anim.request('eat', 'happy')
+      if (Math.random() < REACTION_CHANCE) this._startDialogue('feed')
     } else if (item === 'pet') {
       if (this.petCooldown <= 0) {
         this.stats.happiness = Math.min(4, this.stats.happiness + 1)
+        this._bumpAffinity(2)
         this.petCooldown = 120
         this.anim.request('happy')
+        if (Math.random() < REACTION_CHANCE) this._startDialogue('pet')
       }
     } else if (item === 'play') {
       this.state.minigameActive = true
@@ -250,21 +287,37 @@ export class GameEngine {
       if (this.stats.sick) {
         this.stats.sick = false
         this.sickSince = null
-        this.anim.request('happy')
+        this._bumpAffinity(1)
+        this.anim.set('happy')
       }
     } else if (item === 'clean') {
       if (this.stats.poop_count > 0) {
         this.stats.poop_count = 0
-        this.anim.request('happy')
+        this._bumpAffinity(1)
+        this.anim.request('poop')
       }
     } else if (item === 'status') {
       this.state.showStatus = true
       this.state.statusTimer = 4
     } else if (item === 'special') {
+      this._bumpAffinity(2)
       this.anim.request('special', 'happy')
+    } else if (item === 'talk') {
+      this._startDialogue('talk')
     }
 
     this.onSave?.(this.getSaveData())
+  }
+
+  private _bumpAffinity(amount: number): void {
+    this.stats.affinity = Math.min(100, this.stats.affinity + amount)
+  }
+
+  private _startDialogue(category: DialogueCategory): void {
+    this.state.dialogueTier = affinityTier(this.stats.affinity)
+    this.state.dialogueCategory = category
+    this.state.dialogueLineIndex = Math.floor(Math.random() * DIALOGUE_LINE_COUNTS[category])
+    this.state.dialogueTimer = 3
   }
 
   private _minigamePick(player: string): void {
@@ -278,9 +331,11 @@ export class GameEngine {
     if (player === pc) {
       this.state.minigameResult = 'draw'
       this.stats.happiness = Math.min(4, this.stats.happiness + 1)
+      this._bumpAffinity(1)
     } else if (wins[player] === pc) {
       this.state.minigameResult = 'win'
       this.stats.happiness = Math.min(4, this.stats.happiness + 2)
+      this._bumpAffinity(3)
       this.anim.request('happy')
     } else {
       this.state.minigameResult = 'lose'
@@ -309,20 +364,28 @@ export class GameEngine {
     this.anim.set(name)
   }
 
+  debugAffinity(value: number): void {
+    this.stats.affinity = Math.max(0, Math.min(100, value))
+  }
+
   async debugStage(stage: number): Promise<void> {
-    const maxStage = (await import('./config')).CHARACTER_CONFIGS[this.characterType].stages.length - 1
+    const maxStage = CHARACTER_CONFIGS[this.characterType].stages.length - 1
     const s = Math.max(0, Math.min(stage, maxStage))
     await this.images.loadStage(this.characterType, s)
     this.state.stage = s
-    this.stats.age = s === 0 ? 0 : ((await import('./config')).CHARACTER_CONFIGS[this.characterType].evolutionDay ?? 7)
+    const targetAge = s === 0 ? 0 : (CHARACTER_CONFIGS[this.characterType].evolutionDay ?? DEFAULT_EVOLUTION_DAY)
+    this.stats.age = targetAge
+    // createdAt도 함께 맞춰줘야 다음 update() tick에서 age가 즉시 원래대로 재계산되지 않음
+    this.createdAt = Date.now() / 1000 - targetAge * 86400
     this.anim.set('idle')
   }
 
   private _restart(): void {
-    this.stats = { hunger: 4, happiness: 4, age: 0, weight: 10, sick: false, poop_count: 0, alive: true }
+    this.stats = { hunger: 4, happiness: 4, affinity: 0, age: 0, weight: 10, sick: false, poop_count: 0, alive: true }
     const now = Date.now() / 1000
     this.lastHungerDecay = now
     this.lastHapDecay = now
+    this.createdAt = now
     this.poopTimer = null
     this.hungerZeroSince = null
     this.hapZeroSince = null
@@ -332,7 +395,13 @@ export class GameEngine {
     this.state.menuOpen = false
     this.state.minigameActive = false
     this.state.showStatus = false
+    this.state.dialogueTier = null
+    this.state.dialogueCategory = 'talk'
+    this.state.dialogueTimer = 0
     this.state.stage = 0
+    this.idleChatTimer = 0
+    this.idleChatInterval = rand(IDLE_CHAT_MIN, IDLE_CHAT_MAX)
+    this.greeted = false
     this.anim.set('idle')
     this.onSave?.(this.getSaveData())
   }

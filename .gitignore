@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# private reference material — not app assets, never serve publicly
+/public/picture/talk
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

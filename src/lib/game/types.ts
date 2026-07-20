@@ -1,5 +1,9 @@
 export type AnimName = 'idle' | 'walk' | 'happy' | 'eat' | 'sleep' | 'sad' | 'sick' | 'poop' | 'angry' | 'special'
 
+// 대화 상황 구분 — talk: 메뉴에서 직접 대화, idle: 캐릭터가 먼저 말 거는 잡담,
+// feed/pet: 해당 행동 직후 반응, sick: 아플 때, greet: 접속 시 첫 인사
+export type DialogueCategory = 'talk' | 'idle' | 'feed' | 'pet' | 'sick' | 'greet'
+
 export interface AnimConfig {
   frames: number
   interval: number
@@ -24,6 +28,7 @@ export interface CharacterConfig {
 export interface GameStats {
   hunger: number
   happiness: number
+  affinity: number
   age: number
   weight: number
   sick: boolean
@@ -36,7 +41,7 @@ export interface SaveData {
   last_hunger_decay: number
   last_happiness_decay: number
   poop_timer: number | null
-  last_day: number
+  created_at: number | null
 }
 
 export interface GameState {
@@ -56,4 +61,8 @@ export interface GameState {
   deathTimer: number
   btnFlash: Record<string, number>
   evolveFlash: number
+  dialogueTier: number | null
+  dialogueCategory: DialogueCategory
+  dialogueLineIndex: number
+  dialogueTimer: number
 }

@@ -1,4 +1,4 @@
-import { ANIM_CONFIG, ACTION_ANIMS, CHARACTER_CONFIGS } from './config'
+import { ANIM_CONFIG, ACTION_ANIMS, CHARACTER_CONFIGS, AFFINITY_TIERS } from './config'
 import type { AnimName } from './types'
 
 export class CharacterImages {
@@ -112,4 +112,13 @@ export function stageForAge(age: number, characterType: string): number {
   const ev = CHARACTER_CONFIGS[characterType].evolutionDay
   if (ev === null || age < ev) return 0
   return 1
+}
+
+// 친밀도(0~100) 값이 속하는 대화 단계 인덱스 (AFFINITY_TIERS 기준)
+export function affinityTier(affinity: number): number {
+  let tier = 0
+  for (let i = 0; i < AFFINITY_TIERS.length; i++) {
+    if (affinity >= AFFINITY_TIERS[i]) tier = i
+  }
+  return tier
 }

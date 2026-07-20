@@ -1,8 +1,47 @@
 export const T = {
   en: {
-    menu:        ['Eat', 'Play', 'Hug', 'Heal', 'Shower', 'Status', 'Special'],
+    menu:        ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Status', 'Special', 'Talk'],
     hunger:      'Hunger',
     happy:       'Happy',
+    affinity:    'Affinity',
+    dialogue: {
+      talk: [
+        ['...', '(still a little shy around you)', 'Hmm...', '...hehe', '(shy smile)'],
+        ['Hi! How are you feeling today?', 'I like hanging out with you.', 'I was bored — thanks for talking to me!', 'How was your day?', 'Wanna play with me a bit more?'],
+        ['Sleepy time really flies by...', 'Talking with you was kinda cute~', 'Every day is fun lately, thanks to you.', "It's a little boring without you.", 'I thought about you a lot today.'],
+        ["You're really my precious friend now.", "I think I'd be lonely without you...", 'I was happy today because of you. Thank you.', "Let's stay together for a long, long time.", 'The time I spend with you is my favorite.'],
+      ],
+      idle: [
+        ['...', '(spacing out)', '...what should I do', '(looking around)'],
+        ["The weather's nice today~", "I'm bored, what should we do?", "I'm in a good mood right now!", 'What are you up to?'],
+        ['I was just thinking about you.', 'I called you because I was bored.', 'I really missed you today.', 'I just wanted to chat for a bit.'],
+        ['The day feels empty without you.', 'I just... wanted to hear your voice.', 'Thanks for being with me today too.', "It's most comfortable when you're around."],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Yum!', 'Thanks for the food!', 'Feels good to be full~'],
+        ["It tastes better when it's from you.", 'Food from you is always the best.', 'Thanks for feeding me today too.'],
+        ['It feels like eating together with you.', 'Thanks to you I feel steady every day.', 'Thank you for always taking care of me.'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Hehe, feels good!', 'Do that again!', 'That tickles hehe'],
+        ['Your touch is the most comforting.', 'This makes me want to be spoiled.', 'Can you pet me a little more?'],
+        ['This moment is my happiest.', "There's something special about your touch.", 'I want to stay like this forever.'],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'Hmm... I feel weird'],
+        ["I think I'm a little sick...", "I'm not feeling well...", 'Can you heal me?'],
+        ["It helps that you're here with me.", 'Thinking of you makes it hurt less.', "Let's get better soon and play again."],
+        ['Just knowing you worried about me made me feel better.', 'Even sick, I feel safe with you around.', "Thanks — I can get through this because of you."],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hi'],
+        ["You're here! Hi!", 'Welcome, I was waiting!', 'Good to see you again today!'],
+        ['I was waiting for you to come.', "I missed you, glad you're here!", 'You finally came, so good to see you!'],
+        ['The moment you show up is my favorite part of the day.', "We really need to meet every day, don't we.", 'Thank you for coming again today.'],
+      ],
+    } as Record<string, string[][]>,
     age:         'Age',
     weight:      'Weight',
     ageUnit:     'd',
@@ -42,9 +81,48 @@ export const T = {
     privacyLine2: 'Retention: deleted on withdrawal',
   },
   ko: {
-    menu:        ['먹기', '놀기', '안아주기', '치료', '샤워', '상태', '스페셜'],
+    menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '상태', '스페셜', '대화'],
     hunger:      '배고픔',
     happy:       '행복',
+    affinity:    '친밀도',
+    dialogue: {
+      talk: [
+        ['...', '(아직은 조금 낯설어해요)', '음...', '...ㅎㅎ', '(수줍은 미소)'],
+        ['안녕! 오늘 기분 어때?', '너랑 같이 있으니까 좋아.', '심심했는데 말 걸어줘서 고마워!', '오늘 하루는 어땠어?', '나랑 조금 더 놀아줄래?'],
+        ['졸리운 시간은 금방 가는구나...', '너랑 얘기하니까 좀 귀여웠는데~', '요즘 너 덕분에 매일이 즐거워.', '너 없으면 좀 심심하더라.', '오늘도 네 생각 많이 났어.'],
+        ['너는 이제 진짜 내 소중한 친구야.', '네가 없으면 심심할 것 같아...', '오늘도 네 덕분에 행복했어. 고마워.', '우리 오래오래 함께하자.', '너랑 함께한 시간이 제일 좋아.'],
+      ],
+      idle: [
+        ['...', '(딴청)', '...뭐하지', '(주위를 두리번)'],
+        ['오늘 날씨 좋다~', '심심한데 뭐하지?', '나 지금 기분 좋아!', '너 뭐해?'],
+        ['네 생각하고 있었어.', '심심해서 너 불러봤어.', '오늘따라 네가 보고 싶더라.', '잠깐 얘기하고 싶어서 왔어.'],
+        ['너 없으면 하루가 허전해.', '그냥... 네 목소리가 듣고 싶었어.', '오늘도 나랑 있어줘서 고마워.', '네가 옆에 있는 게 제일 편해.'],
+      ],
+      feed: [
+        ['...', '(우물우물)', '음.'],
+        ['맛있다!', '잘 먹었어, 고마워!', '배부르니까 기분 좋다~'],
+        ['네가 챙겨주니까 더 맛있어.', '역시 네가 주는 게 최고야.', '오늘도 잘 먹었어, 진짜 고마워.'],
+        ['너랑 같이 먹는 기분이야, 좋다.', '네 덕분에 하루하루가 든든해.', '이렇게 챙겨줘서 항상 고마워.'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['헤헤, 기분 좋다!', '한번 더 쓰다듬어줘!', '간지러워 ㅎㅎ'],
+        ['너 손길이 제일 편안해.', '이러니까 자꾸 응석부리고 싶어.', '조금만 더 쓰다듬어줄래?'],
+        ['이 순간이 제일 행복해.', '너 손길엔 뭔가 특별한 게 있어.', '평생 이렇게 있고 싶다.'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '음... 몸이 이상해'],
+        ['나 좀 아픈 것 같아 ㅠㅠ', '컨디션이 안 좋아...', '치료해줄 수 있어?'],
+        ['네가 옆에 있어서 그나마 괜찮아.', '아파도 네 생각하면 좀 나아.', '얼른 나아서 같이 놀자.'],
+        ['네가 걱정해줘서 벌써 나은 것 같아.', '아파도 너랑 있으면 든든해.', '고마워, 네 덕분에 버틸 수 있어.'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어... 안녕'],
+        ['왔구나! 안녕!', '어서와, 기다렸어!', '오늘도 만나서 반가워!'],
+        ['너 오기를 기다리고 있었어.', '보고싶었어, 잘 왔어!', '드디어 왔구나, 반가워!'],
+        ['네가 올 때가 하루 중 제일 좋아.', '역시 우리 매일 만나야 제맛이지.', '오늘도 와줘서 정말 고마워.'],
+      ],
+    } as Record<string, string[][]>,
     age:         '나이',
     weight:      '체중',
     ageUnit:     '일',
@@ -84,3 +162,475 @@ export const T = {
     privacyLine2: '보관: 회원 탈퇴 시 삭제',
   },
 } as const
+
+// 캐릭터별 전용 대화 대사 (실제 팬 소통 말투를 참고해 각색 — 없는 캐릭터/카테고리는 공용 dialogue로 폴백)
+export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, string[][]>; en: Record<string, string[][]> }>> = {
+  kai: {
+    ko: {
+      talk: [
+        ['...', '(아직은 조금 낯설어해요)', '음...', '...ㅋㅋ', '(수줍은 미소)'],
+        ['밥먹었어?', '잘잤어?', '오늘 하루도 화이팅하자!', '나 완전 신나ㅋㅋ', '심심한데 말 걸어볼까 했어'],
+        ['진짜 보고싶었다ㅠㅠㅠㅠ', '오늘 하루가 너무 바빴지만 진짜 즐거운 스케줄이었어', '저녁은 든든히 머거야해 ㅎㅎ', '너랑 있음 시간 완전 빨리감', '나는 항상 응원해'],
+        ['평생 네 편이야ㅠㅠ', '너가 있기에 나는 언제나 행복해!', '난 항상 여기에 있으니 너도 언제나 행복하겠지? 사랑해~', '넘 의지돼', '고마워 진짜 늘'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(먼산)'],
+        ['심심해서 왔지ㅋㅋ', '오늘 컨디션 미쳤다', '뭐하고 있었어', '지굼?'],
+        ['보고싶다', '심심해서 불러봤어ㅎㅎ', '나는 목소리 듣는것도 좋아', '목소리 보내주는건 어때'],
+        ['너 없으면 심심해 죽겠어', '한달동안 안와서 걱정했어.....', '오늘도 같이 있어줘서 고마워', '네가 옆에 있는게 제일 편해'],
+      ],
+      feed: [
+        ['...', '(오물오물)', '음.'],
+        ['맛있다 ㅋㅋ근데', '밥먹었어?!', '배부르니까 좋다'],
+        ['공주야 맛있게 먹어', '꼭꼭 많이 먹어', '많이먹어'],
+        ['저녁은 먹었어? 나는 따뜻한 국물 먹으려고!', '이렇게 챙겨줘서 항상 고마워', '매번 든든하게 챙겨줘서 고마워'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['헤헤 기분 좋다', '한번더해줘ㅋㅋ', '간지러워ㅋㅋ'],
+        ['말랑말랑', '너 손길이 젤 편안해', '조금만 더 해줄래'],
+        ['이 순간이 젤 행복해', '평생 이렇게 있고싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '나 발가락 다쳤어'],
+        ['감기 기운이 있어가지고 국밥 먹어야겠어!', '컨디션 안좋아...', '치료해줄수있어?'],
+        ['다쳤다고 하면 빨리 버블 올거 같아서', '아파도 네생각하면 좀 나아', '얼른나아서 같이놀자'],
+        ['네가 걱정해줘서 벌써 나은것같아', '아파도 너랑있으면 든든해', '고마워 네덕분에 버틸수있어'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어.. 안녕'],
+        ['집와써', '어서와 기다렸어', '오늘도 만나서 반가워!'],
+        ['너 오기를 기다리고있었어', '보고싶었어 잘왔어!', '드디어왔네 반가워'],
+        ['한달동안 안와서 걱정했어.....', '완전 멋있다잉', '오늘도 와줘서 진짜 고마워'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(still a little shy around you)', 'Hmm...', '...lol', '(shy smile)'],
+        ['did u eat', 'sleep well?', "let's fighting today too!", "I'm so hyped lol", 'was bored, thought I\'d talk to you'],
+        ['I really missed you sooo much', 'today was such a busy but fun schedule', 'eat a proper dinner ok hehe', 'time flies way too fast with you', "I'm always cheering for you"],
+        ["I'll be on your side forever", "you're the reason I'm always happy!", "I'm always here, so you'll always be happy too right? love you~", 'I lean on you so much', 'thanks, seriously, always'],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(staring off)'],
+        ['was bored so I came lol', 'feeling insane today', 'what have you been up to', 'rn?'],
+        ['miss you', 'was bored so I called you hehe', 'I like hearing your voice too', 'how about sending me your voice'],
+        ["I'm bored to death without you", "worried 'cause you didn't come for a whole month.....", 'thanks for being with me today too', "it's most comfortable when you're around"],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['tasty lol but', 'did u eat?!', 'feels good to be full'],
+        ['eat well, princess', 'chew properly and eat a lot', 'eat a lot'],
+        ['did you have dinner? I want some warm soup!', 'thanks for always taking care of me like this', "thanks for always making sure I'm fed"],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['hehe feels good', 'again lol', 'that tickles lol'],
+        ['soft soft', 'your touch is the comfiest', 'do that a little more'],
+        ['this moment is the happiest', 'wanna stay like this forever', "everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I hurt my toe'],
+        ["think I'm catching a cold, gotta eat some soup!", 'not feeling well...', 'can you heal me?'],
+        ['figured saying I got hurt would get you here fast', 'thinking of you makes it hurt less', "let's get better soon and play again"],
+        ['just knowing you worried about me made me feel better', 'even sick, I feel safe with you around', "thanks, I can get through this because of you"],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hi'],
+        ["I'm home", 'welcome, I was waiting', 'good to see you again today!'],
+        ['I was waiting for you to come', "missed you, glad you're here!", 'finally, so good to see you'],
+        ["worried 'cause you didn't come for a whole month.....", "you're so cool", 'thanks for coming again today, seriously'],
+      ],
+    },
+  },
+  chanyeol: {
+    ko: {
+      talk: [
+        ['...', '(아직 낯설어하는듯)', '음...', '...ㅋㅋ', '(씨익 웃음)'],
+        ['오늘 농구 하고 왔어!!', '나 완전 텐션 올라있어 ㅋㅋㅋ', '심심한데 같이 놀자!!', '오늘도 신나게 가보자고!', '나랑 랩배틀 할래?ㅋㅋ'],
+        ['너 기다리느라 혼났잖아 ㅋㅋ', '너랑 있으면 자꾸 웃게 돼', '오늘 하루도 완전 재밌었다!', '너 덕분에 매일이 신나', '심심할 틈이 없다니까'],
+        ['너랑 있는 시간이 제일 신나', '우리 계속 이렇게 웃자', '진심으로 고마워, 항상', '너는 진짜 특별한 사람이야', '언제나 네 편이야 나는'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(휘파람)'],
+        ['심심해서 왔지ㅋㅋ', '오늘 컨디션 미쳤다!!', '농구공 만지고 싶다', '뭐하고 놀까?'],
+        ['네 생각나서 왔어ㅋㅋ', '심심한데 얼굴이나 보자', '오늘따라 네가 보고싶더라', '잠깐 놀러 왔어'],
+        ['너 없으면 진짜 심심해', '그냥 목소리 듣고싶었어', '오늘도 같이 있어줘서 고마워', '너랑 있는 게 제일 재밌어'],
+      ],
+      feed: [
+        ['...', '(우걱우걱)', '음.'],
+        ['오 개맛있다ㅋㅋ', '역시 먹는게 최고지!', '배부르니까 힘난다~'],
+        ['네가 챙겨주니까 더 맛있어', '역시 네가 최고야', '오늘도 잘먹었다 고마워!'],
+        ['너랑 같이 먹는 기분이야', '이렇게 챙겨줘서 항상 고마워', '매번 든든하게 챙겨줘서 고마워'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['오예 기분 좋다ㅋㅋ', '한번더!!', '간지러워 ㅋㅋㅋ'],
+        ['너 손길 완전 편안해', '자꾸 응석부리고싶어져', '조금만 더 해줘'],
+        ['이 순간이 젤 행복해', '평생 이렇게 있고싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '몸이 좀 이상해'],
+        ['나 좀 아픈듯ㅠㅠ', '컨디션 완전 별로야', '치료해줄수있어?'],
+        ['네가 옆에 있어서 그나마 괜찮아', '아파도 네생각하면 좀 나아', '얼른나아서 같이놀자'],
+        ['네가 걱정해줘서 벌써 나은것같아', '아파도 너랑있으면 든든해', '고마워 네덕분에 버틸수있어'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어.. 안녕'],
+        ['왔어?! 안녕ㅋㅋㅋ', '기다렸잖아 얼른와!', '오늘도 만나서 개좋다!'],
+        ['너 오기를 기다리고있었어', '보고싶었어 잘왔어!', '드디어왔네 반가워'],
+        ['네가 올때가 하루중 젤좋아', '역시 우리 매일 만나야 제맛이지ㅋㅋ', '오늘도 와줘서 진짜 고마워'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(seems a bit shy)', 'Hmm...', '...lol', '(grins)'],
+        ['Just got back from playing hoops!!', "I'm so hyped right now lol", "Bored, let's hang out!!", "Let's go have fun today!", 'Wanna rap battle? lol'],
+        ['Had to wait for you lol', 'You always make me laugh', 'Today was so much fun!', "Every day's fun thanks to you", 'No time to be bored with you around'],
+        ["Time with you is the most exciting", "Let's keep laughing like this", 'Seriously, thank you, always', "You're really special to me", "I'm always on your side"],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(whistling)'],
+        ["Was bored so I came lol", 'Feeling insane today!!', 'Wanna touch a basketball', 'What should we play?'],
+        ["Came 'cause I thought of you lol", 'Bored, wanted to see your face', 'Really missed you today', 'Just stopped by for a bit'],
+        ["It's boring without you", 'Just wanted to hear your voice', 'Thanks for being with me today too', 'Hanging with you is the most fun'],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Oh this slaps lol', 'Eating is the best!', 'Full and feeling strong~'],
+        ["Tastes better since it's from you", "You're the best, seriously", 'Thanks for feeding me today too!'],
+        ['Feels like eating together with you', 'Thanks for always taking care of me', 'Thanks for always keeping me fed'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Feels good lol', 'Again!!', 'That tickles lol'],
+        ['Your touch is so comforting', 'Makes me want to be spoiled', 'Do that a little more'],
+        ['This moment is the happiest', 'I want to stay like this forever', "Everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I feel kind of weird'],
+        ["I think I'm a little sick", 'Not feeling great...', 'Can you heal me?'],
+        ["It helps that you're here", 'Thinking of you makes it hurt less', "Let's get better soon and play"],
+        ['Knowing you worried helped me feel better', 'Even sick, I feel safe with you', 'Thanks, I can push through because of you'],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hey'],
+        ["You're here?! Hi lol", 'Hurry up, I was waiting!', 'So good to see you today!'],
+        ['I was waiting for you to come', 'Missed you, glad you\'re here!', 'Finally, good to see you!'],
+        ['The moment you show up is my favorite', 'We gotta meet every day lol', 'Thanks for coming again today'],
+      ],
+    },
+  },
+  do: {
+    ko: {
+      talk: [
+        ['...', '(조금 낯을 가려요)', '음...', '...', '(살짝 미소)'],
+        ['밥은 챙겨 먹었어?', '저녁은 맛있는 걸로 골랐어?', '날씨 좋다, 하늘 한번 봐봐', '오늘 하루 어땠어', '심심하면 얘기하자'],
+        ['기다리고 있었어', '보고싶었어, 알지', '날씨 많이 추워졌으니까 따뜻한 거 챙겨먹어', '너랑 있으면 마음이 편해져', '오늘도 즐거웠어, 좋은 밤 보내'],
+        ['너랑 오래오래 함께하고 싶어', '내가 챙겨주고 싶은 사람은 늘 너야', '우리 마음은 변하지 않을거야', '너는 정말 소중한 사람이야', '고마워, 진심으로'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(창밖을 봄)'],
+        ['오늘 날씨 좋네', '심심한데 뭐하지', '기분이 잔잔하게 좋아', '뭐하고 있었어'],
+        ['그냥 네 생각이 나서', '심심해서 불러봤어', '오늘따라 보고싶더라', '얼굴 보고싶어서 왔어'],
+        ['너 없으면 좀 허전해', '그냥 목소리 듣고싶었어', '오늘도 같이 있어줘서 고마워', '네가 옆에 있는게 제일 편해'],
+      ],
+      feed: [
+        ['...', '(오물오물)', '음.'],
+        ['맛있다, 잘 먹었어', '역시 든든하게 먹어야지', '배부르니까 좋다'],
+        ['김치볶음밥은 김치가 맛있어야 맛있어', '역시 네가 해주는 게 최고야', '오늘도 잘 먹었어, 고마워'],
+        ['너랑 같이 먹는 기분이야', '이렇게 챙겨줘서 항상 고마워', '매번 든든하게 챙겨줘서 고마워'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['기분 좋다', '한번 더 해줘', '간지러워'],
+        ['너 손길이 제일 편안해', '자꾸 기대고 싶어져', '조금만 더 해줄래'],
+        ['이 순간이 제일 행복해', '평생 이렇게 있고 싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '몸이 좀 이상해'],
+        ['감기 진짜 조심해야 될 것 같아', '컨디션이 안 좋아', '치료해줄 수 있어?'],
+        ['네가 옆에 있어서 그나마 괜찮아', '아파도 네 생각하면 좀 나아', '얼른 나아서 같이 놀자'],
+        ['네가 걱정해줘서 벌써 나은 것 같아', '아파도 너랑 있으면 든든해', '고마워, 네 덕분에 버틸 수 있어'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어... 안녕'],
+        ['왔구나, 안녕', '나는 아주 건강하게 잘 지내고 있어 흐흐', '오늘도 만나서 반가워'],
+        ['너 오기를 기다리고 있었어', '보고싶었어, 잘 왔어', '드디어 왔네, 반가워'],
+        ['네가 올 때가 하루 중 제일 좋아', '우리 매일 이렇게 만나자', '오늘도 와줘서 정말 고마워'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(a little shy)', 'Hmm...', '...', '(soft smile)'],
+        ['Did you eat well?', 'I did a bit of cooking today', "The weather's nice, isn't it", 'How was your day', "Let's talk if you're bored"],
+        ['I was waiting for you', 'I missed you, you know', "Let's eat something good and feel better", "I feel at ease when I'm with you", 'Today was quietly nice, thanks to you'],
+        ['I want to be with you for a long time', "You're always the one I want to take care of", "This bond won't ever change", "You're really precious to me", 'Thank you, truly'],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(looking out the window)'],
+        ['Nice weather today', 'Bored, what should I do', 'Feeling quietly good', 'What have you been up to'],
+        ['Just thought of you', "Called you 'cause I was bored", 'Really missed you today', 'Wanted to see your face for a bit'],
+        ['It feels a little empty without you', 'Just wanted to hear your voice', 'Thanks for being with me today too', "It's most comfortable when you're around"],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Tasty, thanks for the food', 'Gotta eat well', 'Feels good to be full'],
+        ["Tastes better since it's from you", 'Food from you is the best', 'Thanks for feeding me today too'],
+        ['Feels like eating together with you', 'Thanks for always taking care of me', 'Thanks for always keeping me fed'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Feels nice', 'Again please', 'That tickles'],
+        ['Your touch is the most comforting', 'Makes me want to lean on you', 'Can you do that a little more'],
+        ['This moment is the happiest', 'I want to stay like this forever', "Everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I feel kind of weird'],
+        ["I think I'm a little sick", 'Not feeling well...', 'Can you heal me?'],
+        ["It helps that you're here", 'Thinking of you makes it hurt less', "Let's get better soon and play again"],
+        ['Knowing you worried helped me feel better', 'Even sick, I feel safe with you', "Thanks, I can get through this because of you"],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hi'],
+        ["You're here, hi", 'Welcome, I was waiting', 'Good to see you again today'],
+        ['I was waiting for you to come', "Missed you, glad you're here", 'You finally came, so good to see you'],
+        ['The moment you show up is my favorite part of the day', "Let's keep meeting like this every day", 'Thank you for coming again today'],
+      ],
+    },
+  },
+  ray: {
+    ko: {
+      talk: [
+        ['...', '(수줍게 웃음)', '음...', '...', '(조용히 바라봄)'],
+        ['오늘 춤 연습 좀 하고 왔어', '날씨가 참 좋다', '심심한데 같이 있을래', '오늘 하루 어땠어', '나랑 잠깐 얘기할래'],
+        ['너를 기다리고 있었어', '보고싶었어, 정말로', '오늘도 네 덕분에 마음이 편안해', '너랑 있으면 시간이 느리게 가는것 같아', '오늘도 조용히 행복했어'],
+        ['너랑 언제까지나 함께이고 싶어', '내 마음은 늘 너를 향해 있어', '우리의 마음은 변하지 않을거야', '너는 나에게 정말 소중해', '고마워, 진심으로'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(하늘을 바라봄)'],
+        ['오늘 날씨가 참 좋다', '심심한데 뭐할까', '기분이 잔잔해', '뭐하고 있었어'],
+        ['그냥 네 생각이 났어', '심심해서 불러봤어', '오늘따라 네가 보고싶더라', '잠깐 얼굴 보고싶었어'],
+        ['너 없으면 조용히 허전해', '그냥 목소리가 듣고싶었어', '오늘도 같이 있어줘서 고마워', '네가 옆에 있는게 제일 편안해'],
+      ],
+      feed: [
+        ['...', '(오물오물)', '음.'],
+        ['맛있다, 잘 먹었어', '역시 먹는 게 행복이야', '배부르니까 좋다'],
+        ['네가 챙겨주니까 더 맛있어', '역시 네가 주는 게 제일이야', '오늘도 잘 먹었어, 고마워'],
+        ['너랑 같이 먹는 기분이야', '이렇게 챙겨줘서 항상 고마워', '매번 든든하게 챙겨줘서 고마워'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['기분 좋다, 헤헤', '한번 더 해줄래', '간지러워'],
+        ['너 손길이 제일 편안해', '자꾸 기대고 싶어져', '조금만 더 해줄래'],
+        ['이 순간이 제일 행복해', '평생 이렇게 있고 싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '몸이 좀 이상해'],
+        ['나 좀 아픈 것 같아', '컨디션이 안 좋아', '치료해줄 수 있어?'],
+        ['네가 옆에 있어서 그나마 괜찮아', '아파도 네 생각하면 좀 나아', '얼른 나아서 같이 춤추자'],
+        ['네가 걱정해줘서 벌써 나은 것 같아', '아파도 너랑 있으면 든든해', '고마워, 네 덕분에 버틸 수 있어'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어... 안녕'],
+        ['왔구나, 안녕', '어서와, 기다렸어', '오늘도 만나서 반가워'],
+        ['너 오기를 기다리고 있었어', '보고싶었어, 잘 왔어', '드디어 왔네, 반가워'],
+        ['네가 올 때가 하루 중 제일 좋아', '우리 매일 이렇게 만나자', '오늘도 와줘서 정말 고마워'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(smiles shyly)', 'Hmm...', '...', '(quietly watching)'],
+        ['Did a bit of dance practice today', "The weather's really nice", 'Bored, wanna stay a while', 'How was your day', 'Wanna talk for a bit'],
+        ['I was waiting for you', 'I really missed you', 'I feel at peace today, thanks to you', "Time feels slower when I'm with you", 'Today was quietly happy'],
+        ['I want to be with you forever', 'My heart is always turned toward you', "This feeling between us won't change", "You're truly precious to me", 'Thank you, truly'],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(gazing at the sky)'],
+        ["The weather's really nice today", 'Bored, what should I do', 'Feeling quietly calm', 'What have you been up to'],
+        ['Just thought of you', "Called you 'cause I was bored", 'Really missed you today', 'Wanted to see your face for a bit'],
+        ["It's quietly empty without you", 'Just wanted to hear your voice', 'Thanks for being with me today too', "It's most comfortable when you're around"],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Tasty, thanks for the food', 'Eating really is happiness', 'Feels good to be full'],
+        ["Tastes better since it's from you", 'Food from you is the best', 'Thanks for feeding me today too'],
+        ['Feels like eating together with you', 'Thanks for always taking care of me', 'Thanks for always keeping me fed'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Feels nice, hehe', 'Do that again', 'That tickles'],
+        ['Your touch is the most comforting', 'Makes me want to lean on you', 'Can you do that a little more'],
+        ['This moment is the happiest', 'I want to stay like this forever', "Everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I feel kind of weird'],
+        ["I think I'm a little sick", 'Not feeling well...', 'Can you heal me?'],
+        ["It helps that you're here", 'Thinking of you makes it hurt less', "Let's get better soon and dance again"],
+        ['Knowing you worried helped me feel better', 'Even sick, I feel safe with you', "Thanks, I can get through this because of you"],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hi'],
+        ["You're here, hi", 'Welcome, I was waiting', 'Good to see you again today'],
+        ['I was waiting for you to come', "Missed you, glad you're here", 'You finally came, so good to see you'],
+        ['The moment you show up is my favorite part of the day', "Let's keep meeting like this every day", 'Thank you for coming again today'],
+      ],
+    },
+  },
+  sehun: {
+    ko: {
+      talk: [
+        ['...', '(무심한 척)', '음...', '...ㅋ', '(살짝 곁눈질)'],
+        ['패딩 입자 이번엔 진짜', '오늘 컨디션 나쁘지 않아', '점심 맛있는거 먹기', '뭐하냐', '심심한데 놀아줄까'],
+        ['비타민 잘 챙겨먹어야 감기 안걸려', '구름뭐야 솜사탕이야뭐야', '오늘도 좋은 하루 되어요', '너랑 있으면 시간 잘가', '진짜 이쁜것들은 사진에 안담기나봐'],
+        ['너랑 계속 같이 있고 싶어', '내 진심은 늘 너한테 있어', '이 마음은 절대 안변해', '너 진짜 소중한 사람이야', '고마워, 진짜로'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(먼산)'],
+        ['그냥 심심해서', '오늘 컨디션 나쁘지 않아', '뭐하냐', '훙훙훙'],
+        ['그냥... 네 생각나서', '심심해서 와봤어', '오늘따라 좀 보고싶더라', '잠깐 얼굴 보러 왔어'],
+        ['너 없으면 좀 심심해', '그냥 목소리 듣고 싶었어', '오늘도 같이 있어줘서 고마워', '네가 옆에 있는게 편해, 인정'],
+      ],
+      feed: [
+        ['...', '(오물오물)', '음.'],
+        ['나쁘지 않네', '점심 맛있는거 먹기', '배부르니까 낫다'],
+        ['네가 챙겨주니까 더 맛있네', '역시 네가 주는 게 낫다', '오늘도 잘 먹었어, 고마워'],
+        ['너랑 같이 먹는 기분이야', '이렇게 챙겨줘서 고마워', '매번 챙겨줘서 고맙다, 진짜'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['나쁘지 않은데', '한번 더', '착하네'],
+        ['너 손길 편하네', '자꾸 기대고 싶어지네', '조금만 더 해봐'],
+        ['이 순간이 제일 좋아', '계속 이렇게 있고 싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '몸이 좀 이상해'],
+        ['감기 조심해야하는데 나부터 걸렸네', '컨디션 별로야', '치료 좀 해줄래'],
+        ['네가 옆에 있으니까 낫네', '아파도 네 생각하면 나아', '얼른 나아서 같이 놀자'],
+        ['네가 걱정해줘서 벌써 나은 것 같아', '아파도 너랑 있으면 든든해', '고마워, 네 덕분이야'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어... 왔냐'],
+        ['왔냐, 좋은 아침이야', '기다렸잖아, 늦게왔네', '오늘도 왔네'],
+        ['기다리고 있었어', '보고싶었어, 됐냐', '왔구나, 반갑다'],
+        ['네가 올 때가 하루 중 제일 좋아', '우리 매일 만나야지', '오늘도 와줘서 고맙다'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(playing it cool)', 'Hmm...', '...k', '(side glance)'],
+        ["Let's actually wear our padded coats this time", 'Not in a bad mood today', 'have a good lunch', 'What are you doing', 'Bored, wanna play'],
+        ["take your vitamins or you'll catch a cold", 'is that a cloud or cotton candy', 'hope you have a good day too', 'Time flies when I\'m with you', "the really pretty things never make it into a photo"],
+        ["I wanna keep being with you", 'My real feelings are always with you', "This won't ever change", "You're really precious to me", 'Thanks, for real'],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(staring off)'],
+        ['just bored', 'Not in a bad mood today', 'What are you doing', 'hehehe'],
+        ['Just... thought of you', "Came 'cause I was bored", 'Kinda missed you today', 'Came to see your face for a sec'],
+        ['Kinda bored without you', 'Just wanted to hear your voice', 'Thanks for being with me today too', 'Fine, having you around is comfortable'],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Not bad', 'have a good lunch', "Better now that I'm full"],
+        ["Tastes better since it's from you", "Better when it's from you", 'Thanks for feeding me today too'],
+        ['Feels like eating together with you', 'Thanks for taking care of me', 'Thanks for always keeping me fed, seriously'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Not bad', 'Again', 'good kid'],
+        ['Your touch is comfortable', 'Makes me want to lean on you', 'Do that a little more'],
+        ['This moment is the best', 'I want to stay like this', "Everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I feel kind of weird'],
+        ["was gonna tell you to watch out for colds and then I caught one myself", 'Not feeling great', 'Can you heal me'],
+        ['Better with you here', 'Thinking of you helps it hurt less', "Let's get better soon and play"],
+        ['Knowing you worried helped me feel better', 'Even sick, I feel safe with you', "Thanks, it's because of you"],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... you again'],
+        ['hey, good morning', 'Took you long enough', "You're here again today"],
+        ['I was waiting', 'Missed you, happy now?', 'Good to see you'],
+        ['The moment you show up is my favorite', 'We should meet every day', 'Thanks for coming again today'],
+      ],
+    },
+  },
+  suho: {
+    ko: {
+      talk: [
+        ['...', '(조금 어색해해요)', '음...', '...', '(따뜻한 미소)'],
+        ['오늘 하루도 잘 보냈어?', '며니 방금 연습하고 왔어', '날씨가 참 좋다', '오늘도 힘내자', '심심하면 얘기하자'],
+        ['기다리고 있었어', '보고싶었어, 알지', '사랑해', '너랑 있으면 든든해', '오늘도 네 덕분에 좋은 하루였어'],
+        ['너랑 오래오래 함께하고 싶어', '내가 지켜주고 싶은 사람은 늘 너야', '우리 마음은 절대 안변하잉', '너는 정말 소중한 사람이야', '고마워, 진심으로'],
+      ],
+      idle: [
+        ['...', '(딴청)', '음...', '(생각에 잠김)'],
+        ['오늘 날씨 좋네', '심심한데 뭐 할까', '기분 좋게 하루 시작했어', '뭐하고 있었어'],
+        ['그냥 네 생각이 나서', '심심해서 불러봤어', '오늘따라 네가 보고싶더라', '잠깐 얼굴 보고싶었어'],
+        ['너 없으면 좀 허전해', '그냥 목소리가 듣고싶었어', '오늘도 같이 있어줘서 고마워', '네가 옆에 있는게 제일 든든해'],
+      ],
+      feed: [
+        ['...', '(오물오물)', '음.'],
+        ['맛있다, 잘 먹었어', '든든하게 먹어야지', '배부르니까 힘이 나'],
+        ['네가 챙겨주니까 더 맛있어', '역시 네가 주는 게 최고야', '오늘도 잘 먹었어, 고마워'],
+        ['너랑 같이 먹는 기분이야', '이렇게 챙겨줘서 항상 고마워', '매번 든든하게 챙겨줘서 고마워'],
+      ],
+      pet: [
+        ['...', '(가만히)', '음?'],
+        ['기분 좋다', '한번 더 해줘', '간지러워'],
+        ['너 손길이 제일 편안해', '자꾸 기대고 싶어져', '조금만 더 해줄래'],
+        ['이 순간이 제일 행복해', '평생 이렇게 있고 싶다', '너랑 있으면 다 괜찮아져'],
+      ],
+      sick: [
+        ['...아파', '(끙끙)', '몸이 좀 이상해'],
+        ['나 좀 아픈 것 같아', '컨디션이 안 좋아', '치료해줄 수 있어?'],
+        ['네가 옆에 있어서 그나마 괜찮아', '아파도 네 생각하면 좀 나아', '얼른 나아서 같이 놀자'],
+        ['네가 걱정해줘서 벌써 나은 것 같아', '아파도 너랑 있으면 든든해', '고마워, 네 덕분에 버틸 수 있어'],
+      ],
+      greet: [
+        ['...', '(빼꼼)', '어... 안녕'],
+        ['왔구나, 안녕', '어서와, 기다렸어', '오늘도 만나서 반가워'],
+        ['너 오기를 기다리고 있었어', '보고싶었어, 잘 왔어', '드디어 왔네, 반가워'],
+        ['네가 올 때가 하루 중 제일 좋아', '우리 매일 이렇게 만나자', '오늘도 와줘서 정말 고마워'],
+      ],
+    },
+    en: {
+      talk: [
+        ['...', '(a little shy)', 'Hmm...', '...', '(warm smile)'],
+        ['Did you have a good day today?', 'Just got back from practice', "The weather's really nice", "Let's do our best today too", "Let's talk if you're bored"],
+        ['I was waiting for you', 'I missed you, you know', "Let's eat something good and feel better", "I feel steady when I'm with you", 'Today was a good day, thanks to you'],
+        ['I want to be with you for a long time', "You're always the one I want to protect", 'This bond will never change', "You're really precious to me", 'Thank you, truly'],
+      ],
+      idle: [
+        ['...', '(spacing out)', 'Hmm...', '(lost in thought)'],
+        ['Nice weather today', 'Bored, what should I do', 'Started the day feeling good', 'What have you been up to'],
+        ['Just thought of you', "Called you 'cause I was bored", 'Really missed you today', 'Wanted to see your face for a bit'],
+        ['It feels a little empty without you', 'Just wanted to hear your voice', 'Thanks for being with me today too', 'Having you around is the most reassuring'],
+      ],
+      feed: [
+        ['...', '(munching)', 'Mm.'],
+        ['Tasty, thanks for the food', 'Gotta eat well to stay strong', 'Feels good to be full'],
+        ["Tastes better since it's from you", 'Food from you is the best', 'Thanks for feeding me today too'],
+        ['Feels like eating together with you', 'Thanks for always taking care of me', 'Thanks for always keeping me fed'],
+      ],
+      pet: [
+        ['...', '(staying still)', 'Hm?'],
+        ['Feels nice', 'Again please', 'That tickles'],
+        ['Your touch is the most comforting', 'Makes me want to lean on you', 'Can you do that a little more'],
+        ['This moment is the happiest', 'I want to stay like this forever', "Everything's okay when I'm with you"],
+      ],
+      sick: [
+        ['...it hurts', '(groaning)', 'I feel kind of weird'],
+        ["I think I'm a little sick", 'Not feeling well...', 'Can you heal me?'],
+        ["It helps that you're here", 'Thinking of you makes it hurt less', "Let's get better soon and play again"],
+        ['Knowing you worried helped me feel better', 'Even sick, I feel safe with you', "Thanks, I can get through this because of you"],
+      ],
+      greet: [
+        ['...', '(peeking)', 'Uh... hi'],
+        ["You're here, hi", 'Welcome, I was waiting', 'Good to see you again today'],
+        ['I was waiting for you to come', "Missed you, glad you're here", 'You finally came, so good to see you'],
+        ['The moment you show up is my favorite part of the day', "Let's keep meeting like this every day", 'Thank you for coming again today'],
+      ],
+    },
+  },
+}
