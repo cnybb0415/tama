@@ -18,6 +18,12 @@ export const ACTION_ANIMS = new Set<AnimName>(['eat', 'happy', 'poop', 'angry', 
 // 성인이 되기까지 걸리는 일수 (기본값 — evolutionDay 미지정 시 폴백)
 export const DEFAULT_EVOLUTION_DAY = 5
 
+// 체중 — 시작 체중 + (나이 × 하루당 증가량)이 그날 기준 최대치.
+// 배고픔이 이미 꽉 찼어도 먹이주기를 계속 누를 수 있어서, 나이와 무관하게
+// 무한정 늘어나는 걸 막기 위한 상한선
+export const BASE_WEIGHT = 10
+export const WEIGHT_PER_DAY = 2
+
 export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   kai: {
     displayName: 'KAI',

@@ -11,6 +11,7 @@ export interface GameCanvasHandle {
   debugAnim: (name: AnimName) => void
   debugStage: (stage: number) => void
   debugAffinity: (value: number) => void
+  debugWeight: (value: number) => void
 }
 
 interface Props {
@@ -31,6 +32,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
     debugAnim: (name: AnimName) => engineRef.current?.debugAnim(name),
     debugStage: (stage: number) => { engineRef.current?.debugStage(stage) },
     debugAffinity: (value: number) => engineRef.current?.debugAffinity(value),
+    debugWeight: (value: number) => engineRef.current?.debugWeight(value),
   }))
 
   useEffect(() => {

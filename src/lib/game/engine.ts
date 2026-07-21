@@ -1,4 +1,4 @@
-import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE } from './config'
+import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE, BASE_WEIGHT, WEIGHT_PER_DAY } from './config'
 import { CharacterAnim, CharacterImages, stageForAge, affinityTier } from './character'
 import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from './types'
 
@@ -18,7 +18,7 @@ export class GameEngine {
   anim: CharacterAnim
 
   stats: GameStats = {
-    hunger: 4, happiness: 4, affinity: 0, age: 0, weight: 10,
+    hunger: 4, happiness: 4, affinity: 0, age: 0, weight: BASE_WEIGHT,
     sick: false, poop_count: 0, alive: true,
   }
 
@@ -267,7 +267,8 @@ export class GameEngine {
 
     if (item === 'feed') {
       this.stats.hunger = Math.min(4, this.stats.hunger + 1)
-      this.stats.weight++
+      const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
+      this.stats.weight = Math.min(maxWeight, this.stats.weight + 1)
       this._bumpAffinity(1)
       this._schedulePoop()
       this.anim.request('eat', 'happy')
@@ -371,6 +372,10 @@ export class GameEngine {
     this.stats.affinity = Math.max(0, Math.min(100, value))
   }
 
+  debugWeight(value: number): void {
+    this.stats.weight = Math.max(0, value)
+  }
+
   async debugStage(stage: number): Promise<void> {
     const maxStage = CHARACTER_CONFIGS[this.characterType].stages.length - 1
     const s = Math.max(0, Math.min(stage, maxStage))
@@ -384,7 +389,7 @@ export class GameEngine {
   }
 
   private _restart(): void {
-    this.stats = { hunger: 4, happiness: 4, affinity: 0, age: 0, weight: 10, sick: false, poop_count: 0, alive: true }
+    this.stats = { hunger: 4, happiness: 4, affinity: 0, age: 0, weight: BASE_WEIGHT, sick: false, poop_count: 0, alive: true }
     const now = Date.now() / 1000
     this.lastHungerDecay = now
     this.lastHapDecay = now

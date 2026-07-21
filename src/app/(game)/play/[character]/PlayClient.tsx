@@ -143,6 +143,11 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
             ))}
             <button style={btn} onClick={() => gameRef.current?.debugAffinity(100)}>100</button>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
+            <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.weight}</div>
+            {[10, 20, 50, 100].map(v => (
+              <button key={v} style={btn} onClick={() => gameRef.current?.debugWeight(v)}>{v}{t.weightUnit}</button>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }} />
             <div style={{ color: '#888', fontSize: 9, fontFamily: 'monospace', marginBottom: 2 }}>{t.animLabel}</div>
             {ANIMS.map(a => (
               <button key={a} style={btn} onClick={() => gameRef.current?.debugAnim(a)}>{a}</button>
