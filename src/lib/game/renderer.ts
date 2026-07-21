@@ -320,7 +320,10 @@ export class GameRenderer {
     const text = lines[state.dialogueLineIndex % lines.length] ?? '...'
 
     const bw = SCREEN.w * 0.85
-    const bh = 48
+    ctx.font = KO_FONT
+    const wrappedLines = wrapLines(ctx, text, bw - 16)
+    // 대사가 길어서(한중 혼용 등) 여러 줄이 되면 말풍선 높이도 같이 늘어남
+    const bh = Math.max(48, 24 + wrappedLines.length * 14)
     const bx = SCREEN.x + (SCREEN.w - bw) / 2
     const by = SCREEN.y + 3
     const r = 11
@@ -546,11 +549,7 @@ function overlay(
   ctx.fillRect(rect.x, rect.y, rect.w, rect.h)
 }
 
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string, cx: number, cy: number, maxWidth: number, lineHeight: number,
-  opts?: { stroke?: boolean }
-): void {
+function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const words = text.split(' ')
   const lines: string[] = []
   let line = ''
@@ -562,8 +561,25 @@ function wrapText(
     } else {
       line = test
     }
+    // 중국어/한자처럼 띄어쓰기 없는 덩어리가 그 자체로 maxWidth보다 넓으면
+    // 단어 단위 줄바꿈으로는 못 끊으므로 글자 단위로 강제 분할
+    while (ctx.measureText(line).width > maxWidth && line.length > 1) {
+      let split = line.length
+      while (split > 1 && ctx.measureText(line.slice(0, split)).width > maxWidth) split--
+      lines.push(line.slice(0, split))
+      line = line.slice(split)
+    }
   }
   if (line) lines.push(line)
+  return lines
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string, cx: number, cy: number, maxWidth: number, lineHeight: number,
+  opts?: { stroke?: boolean }
+): void {
+  const lines = wrapLines(ctx, text, maxWidth)
   const startY = cy - ((lines.length - 1) * lineHeight) / 2
   lines.forEach((l, i) => {
     const ly = startY + i * lineHeight

@@ -130,6 +130,9 @@ export class GameEngine {
         this.anim.set('happy')
         this.onEvolve?.(newStage)
       }
+      // 나이가 바뀐 시점에 바로 저장 — 유저가 아무 액션도 안 하고 탭을 닫으면
+      // 진화(성인 전환)가 저장 안 되고 다음 접속때 되돌아가는 문제가 있었음
+      this.onSave?.(this.getSaveData())
     }
 
     if (this.state.evolveFlash > 0)

@@ -38,6 +38,7 @@ yarn-error.log*
 
 # private reference material — not app assets, never serve publicly
 /public/picture/talk
+/public/picture/talk.zip
 
 # typescript
 *.tsbuildinfo

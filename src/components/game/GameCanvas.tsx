@@ -50,14 +50,17 @@ const GameCanvas = forwardRef<GameCanvasHandle, Props>(function GameCanvas(
       if (cancelled) return
 
       const images = new CharacterImages()
-      try { await images.loadStage(characterType, 0) } catch (e) { console.error('loadStage:', e) }
-      if (cancelled) return
-
       const engine = new GameEngine(characterType, images)
       engine.onSave = onSave
       engine.onEvolve = async (stage) => { await images.loadStage(characterType, stage) }
+      // 세이브를 먼저 불러와서 실제 나이에 맞는 스테이지를 계산한 뒤,
+      // 그 스테이지의 스프라이트를 로드함 (항상 kid로 로드하면 이미 다 자란
+      // 캐릭터도 로드 직후엔 아직 kid 그림으로 보이는 버그가 있었음)
       if (initialSave) engine.loadSave(initialSave)
       engineRef.current = engine
+
+      try { await images.loadStage(characterType, engine.state.stage) } catch (e) { console.error('loadStage:', e) }
+      if (cancelled) return
 
       let lastTime = performance.now()
 

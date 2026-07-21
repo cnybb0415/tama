@@ -15,15 +15,28 @@ create table if not exists game_saves (
   unique(user_id, character_type)
 );
 
+-- 웹 푸시 구독 정보 (브라우저당 1개 — 여러 기기에서 구독 가능하도록 endpoint 기준 unique)
+create table if not exists push_subscriptions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  last_notified_at timestamptz,
+  created_at timestamptz default now()
+);
+
 -- RLS 활성화
 alter table profiles enable row level security;
 alter table game_saves enable row level security;
+alter table push_subscriptions enable row level security;
 
 -- 기존 정책 제거
 drop policy if exists "own profile" on profiles;
 drop policy if exists "own saves" on game_saves;
 drop policy if exists "profiles_select_own" on profiles;
 drop policy if exists "saves_select_own" on game_saves;
+drop policy if exists "push_select_own" on push_subscriptions;
 
 -- profiles: 자기 자신만 조회 가능, 쓰기 불가 (트리거가 처리)
 create policy "profiles_select_own" on profiles
@@ -33,6 +46,10 @@ create policy "profiles_select_own" on profiles
 -- → anon/authenticated 키로 직접 curl해도 insert/update/delete 불가
 -- → 오직 service role key (Next.js 서버)만 쓰기 가능
 create policy "saves_select_own" on game_saves
+  for select using (auth.uid() = user_id);
+
+-- push_subscriptions: 조회는 자기 것만, 쓰기는 서버(service role)만 가능
+create policy "push_select_own" on push_subscriptions
   for select using (auth.uid() = user_id);
 
 -- 회원가입 시 자동 profiles 생성

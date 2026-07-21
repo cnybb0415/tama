@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import type { SaveData, AnimName } from '@/lib/game/types'
 import { AFFINITY_TIERS } from '@/lib/game/config'
 import type { GameCanvasHandle } from '@/components/game/GameCanvas'
+import NotifyToggle from '@/components/game/NotifyToggle'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
@@ -22,19 +23,41 @@ interface Props {
 
 export default function PlayClient({ characterType, initialSave, isAdmin }: Props) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingSaveRef = useRef<SaveData | null>(null)
   const gameRef = useRef<GameCanvasHandle>(null)
   const [debug, setDebug] = useState(false)
   const { lang, t } = useLang()
 
-  const handleSave = useCallback(async (data: SaveData) => {
+  const handleSave = useCallback((data: SaveData) => {
+    pendingSaveRef.current = data
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
-    saveTimeoutRef.current = setTimeout(async () => {
-      await fetch(`/api/game/${characterType}`, {
+    saveTimeoutRef.current = setTimeout(() => {
+      pendingSaveRef.current = null
+      fetch(`/api/game/${characterType}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ save: data }),
       })
     }, 1500)
+  }, [characterType])
+
+  // 탭이 백그라운드로 가거나 닫힐 때 debounce(1.5초)를 기다리지 않고 즉시 저장 —
+  // 안 그러면 방금 한 행동이 저장되기 전에 탭을 닫아서 유실될 수 있음
+  useEffect(() => {
+    const flush = () => {
+      if (!pendingSaveRef.current) return
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+      const body = JSON.stringify({ save: pendingSaveRef.current })
+      pendingSaveRef.current = null
+      navigator.sendBeacon?.(`/api/game/${characterType}`, new Blob([body], { type: 'application/json' }))
+    }
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flush() }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('pagehide', flush)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pagehide', flush)
+    }
   }, [characterType])
 
   const btn: React.CSSProperties = {
@@ -67,6 +90,11 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
               }}>{l.toUpperCase()}</button>
             ))}
           </span>
+          <NotifyToggle
+            labelOn={t.notifyOn}
+            labelOff={t.notifyOff}
+            style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: 'rgba(255,255,255,0.7)' }}
+          />
           {isAdmin && (
             <button
               onClick={() => setDebug(d => !d)}

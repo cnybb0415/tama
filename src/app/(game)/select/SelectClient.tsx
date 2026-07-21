@@ -25,6 +25,8 @@ const BTNS = {
 
 type BtnSide = keyof typeof BTNS
 
+const LAST_CHARACTER_KEY = 'exo_last_character'
+
 interface Props { username: string }
 
 export default function SelectClient({ username }: Props) {
@@ -33,6 +35,14 @@ export default function SelectClient({ username }: Props) {
   const [idx, setIdx]       = useState(0)
   const [flash, setFlash]   = useState<BtnSide | null>(null)
   const [notice, setNotice] = useState('')
+
+  // 마지막으로 플레이한 캐릭터를 기본 선택으로 — localStorage는 클라이언트에서만
+  // 읽을 수 있어서 마운트 후에 반영 (SSR과 안 맞으면 하이드레이션 에러 나서 useEffect로)
+  useEffect(() => {
+    const saved = localStorage.getItem(LAST_CHARACTER_KEY)
+    const i = CHARACTERS.findIndex(c => c.id === saved)
+    if (i >= 0) setIdx(i)
+  }, [])
 
   const current = CHARACTERS[idx]
 
@@ -55,6 +65,7 @@ export default function SelectClient({ username }: Props) {
       press('center', () => showNotice(t.comingSoon))
       return
     }
+    localStorage.setItem(LAST_CHARACTER_KEY, char.id)
     setFlash('center')
     router.push(`/play/${char.id}`)
   }, [idx, router, press])
