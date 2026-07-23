@@ -4,8 +4,8 @@ import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from 
 
 // 배고픔/행복은 이제 실제 경과 시간 기준으로 앱을 며칠 안 켜도 정확히 따라잡힘
 // (나이 계산과 같은 방식) — 그만큼 감소 주기/사망 유예시간은 널널하게 잡음
-const HUNGER_DECAY  = 3  * 60 * 60   // 칸당 3시간 (풀 4칸 → 12시간 만에 0)
-const HAP_DECAY     = 4  * 60 * 60   // 칸당 4시간 (풀 4칸 → 16시간 만에 0)
+const HUNGER_DECAY  = 4  * 60 * 60   // 칸당 4시간 (풀 4칸 → 16시간 만에 0)
+const HAP_DECAY     = 6  * 60 * 60   // 칸당 6시간 (풀 4칸 → 24시간 만에 0)
 const HUNGER_DEATH  = 12 * 60 * 60   // 0인 채로 12시간
 const HAP_DEATH     = 12 * 60 * 60
 const SICK_DEATH    = 12 * 60 * 60
