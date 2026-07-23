@@ -6,7 +6,7 @@ import type { SaveData } from '@/lib/game/types'
 
 export const maxDuration = 60
 
-const HUNGER_DECAY = 30 * 60
+const HUNGER_DECAY = 3 * 60 * 60
 // 알림 재발송 간격 — 이 시간 안에 이미 알렸으면 또 보내지 않음
 const NOTIFY_COOLDOWN = 3 * 60 * 60
 // 이만큼 접속(저장) 안 하면 "오랜만이네" 알림 대상
