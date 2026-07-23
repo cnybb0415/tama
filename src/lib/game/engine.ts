@@ -237,9 +237,11 @@ export class GameEngine {
       }
     }
 
-    // State-driven animations
+    // State-driven animations — sick/sad는 조건이 풀려도 저절로 idle로 안 돌아오므로
+    // (sad/sick은 loop 애니메이션이라 계속 반복될 뿐) 명시적으로 idle로 되돌려줘야 함
     if (this.stats.sick) this.anim.force('sick')
     else if (this.stats.hunger === 0 || this.stats.happiness === 0) this.anim.force('sad')
+    else if (this.anim.currentAnim === 'sad' || this.anim.currentAnim === 'sick') this.anim.force('idle')
 
     this.anim.update(dt, (a: AnimName) => this.images.sprites[a]?.length ?? 1)
 
