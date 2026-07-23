@@ -91,6 +91,12 @@ export const MENU_LABELS = ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Status', 'Sp
 // 친밀도(친밀도 0~100) 구간별 대화 단계 — 값 이상이면 해당 단계 대화가 열림
 export const AFFINITY_TIERS = [0, 15, 40, 75]
 
+// 배고픔/행복(0~4)이 이 값보다 낮아지면 친밀도가 깎이기 시작함
+export const AFFINITY_DECAY_THRESHOLD = 2
+// deficit(THRESHOLD - 값) 1당 이 시간(초)마다 친밀도 -1. deficit이 클수록
+// (예: 값이 0이면 deficit=2) 그만큼 비례해서 더 자주 깎임
+export const AFFINITY_DECAY_BASE_INTERVAL = 8 * 60 * 60
+
 // 대화 상황(카테고리)별 친밀도 단계당 대사 개수
 export const DIALOGUE_LINE_COUNTS: Record<DialogueCategory, number> = {
   talk:  5,

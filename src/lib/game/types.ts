@@ -40,6 +40,8 @@ export interface SaveData {
   stats: GameStats
   last_hunger_decay: number
   last_happiness_decay: number
+  last_affinity_decay_hunger: number | null
+  last_affinity_decay_happiness: number | null
   poop_timer: number | null
   created_at: number | null
 }

@@ -1,4 +1,4 @@
-import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE, BASE_WEIGHT, WEIGHT_PER_DAY } from './config'
+import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE, BASE_WEIGHT, WEIGHT_PER_DAY, AFFINITY_DECAY_THRESHOLD, AFFINITY_DECAY_BASE_INTERVAL } from './config'
 import { CharacterAnim, CharacterImages, stageForAge, affinityTier } from './character'
 import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from './types'
 
@@ -49,6 +49,8 @@ export class GameEngine {
 
   private lastHungerDecay = Date.now() / 1000
   private lastHapDecay    = Date.now() / 1000
+  private lastAffinityDecayHunger    = Date.now() / 1000
+  private lastAffinityDecayHappiness = Date.now() / 1000
   private poopTimer: number | null = null
   private petCooldown = 0
   private hungerZeroSince: number | null = null
@@ -78,6 +80,8 @@ export class GameEngine {
     if (this.stats.affinity == null) this.stats.affinity = 0
     this.lastHungerDecay = data.last_hunger_decay || Date.now() / 1000
     this.lastHapDecay    = data.last_happiness_decay || Date.now() / 1000
+    this.lastAffinityDecayHunger    = data.last_affinity_decay_hunger ?? Date.now() / 1000
+    this.lastAffinityDecayHappiness = data.last_affinity_decay_happiness ?? Date.now() / 1000
     this.poopTimer       = data.poop_timer ?? null
     // 예전 저장 데이터(created_at 없음)는 현재 age를 유지하도록 역산해서 채워줌
     this.createdAt = data.created_at ?? (Date.now() / 1000 - this.stats.age * 86400)
@@ -96,6 +100,8 @@ export class GameEngine {
       stats: this.stats,
       last_hunger_decay: this.lastHungerDecay,
       last_happiness_decay: this.lastHapDecay,
+      last_affinity_decay_hunger: this.lastAffinityDecayHunger,
+      last_affinity_decay_happiness: this.lastAffinityDecayHappiness,
       poop_timer: this.poopTimer,
       created_at: this.createdAt,
     }
@@ -152,6 +158,16 @@ export class GameEngine {
     this.stats.happiness = hapTick.value
     this.lastHapDecay = hapTick.lastDecay
     this.hapZeroSince = hapTick.zeroSince
+
+    // 친밀도 감소 — 배고픔/행복이 THRESHOLD 밑으로 떨어져 있는 동안, 얼마나
+    // 낮은지(deficit)에 비례해서 깎임. 둘 다 낮으면 양쪽에서 각각 깎여 더 빨리 감소
+    const affHungerTick = this._tickAffinityDecay(this.stats.hunger, this.lastAffinityDecayHunger, now)
+    this.stats.affinity = affHungerTick.affinity
+    this.lastAffinityDecayHunger = affHungerTick.lastDecay
+
+    const affHapTick = this._tickAffinityDecay(this.stats.happiness, this.lastAffinityDecayHappiness, now)
+    this.stats.affinity = affHapTick.affinity
+    this.lastAffinityDecayHappiness = affHapTick.lastDecay
 
     // Poop
     if (this.poopTimer !== null && now >= this.poopTimer) {
@@ -247,6 +263,21 @@ export class GameEngine {
     }
     const newValue = Math.max(0, value - ticks)
     return { value: newValue, lastDecay: newLastDecay, zeroSince: newValue === 0 ? zeroSince : null }
+  }
+
+  // 배고픔/행복 값이 AFFINITY_DECAY_THRESHOLD 이상이면 감소 없음(타이머만 리셋).
+  // 그 밑이면 deficit(THRESHOLD - 값)에 비례해서 간격이 짧아짐 — 값이 낮을수록 더 자주 -1
+  private _tickAffinityDecay(
+    statValue: number, lastDecay: number, now: number
+  ): { affinity: number; lastDecay: number } {
+    if (statValue >= AFFINITY_DECAY_THRESHOLD) return { affinity: this.stats.affinity, lastDecay: now }
+
+    const deficit = AFFINITY_DECAY_THRESHOLD - statValue
+    const interval = AFFINITY_DECAY_BASE_INTERVAL / deficit
+    const ticks = Math.floor((now - lastDecay) / interval)
+    if (ticks <= 0) return { affinity: this.stats.affinity, lastDecay }
+
+    return { affinity: Math.max(0, this.stats.affinity - ticks), lastDecay: lastDecay + ticks * interval }
   }
 
   // ── Input ──────────────────────────────────────────────────────────────
@@ -417,6 +448,8 @@ export class GameEngine {
     const now = Date.now() / 1000
     this.lastHungerDecay = now
     this.lastHapDecay = now
+    this.lastAffinityDecayHunger = now
+    this.lastAffinityDecayHappiness = now
     this.createdAt = now
     this.poopTimer = null
     this.hungerZeroSince = null
