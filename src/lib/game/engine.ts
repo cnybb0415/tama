@@ -65,6 +65,9 @@ export class GameEngine {
   private idleChatTimer = 0
   private idleChatInterval = rand(IDLE_CHAT_MIN, IDLE_CHAT_MAX)
   private greeted = false
+  // 디버그 ANIM 버튼으로 미리보기 중일 땐 실제 스탯 기반 강제 애니메이션(sick/sad/idle 복귀)을
+  // 건드리지 않음 — 안 그러면 바로 다음 프레임에 스탯이 정상이라 idle로 도로 튕겨나감
+  private debugAnimActive = false
 
   onSave?: (data: SaveData) => void
   onEvolve?: (stage: number) => void
@@ -238,10 +241,13 @@ export class GameEngine {
     }
 
     // State-driven animations — sick/sad는 조건이 풀려도 저절로 idle로 안 돌아오므로
-    // (sad/sick은 loop 애니메이션이라 계속 반복될 뿐) 명시적으로 idle로 되돌려줘야 함
-    if (this.stats.sick) this.anim.force('sick')
-    else if (this.stats.hunger === 0 || this.stats.happiness === 0) this.anim.force('sad')
-    else if (this.anim.currentAnim === 'sad' || this.anim.currentAnim === 'sick') this.anim.force('idle')
+    // (sad/sick은 loop 애니메이션이라 계속 반복될 뿐) 명시적으로 idle로 되돌려줘야 함.
+    // 단, 디버그로 미리보기 중이면 실제 스탯과 무관하게 고른 애니메이션을 그대로 유지
+    if (!this.debugAnimActive) {
+      if (this.stats.sick) this.anim.force('sick')
+      else if (this.stats.hunger === 0 || this.stats.happiness === 0) this.anim.force('sad')
+      else if (this.anim.currentAnim === 'sad' || this.anim.currentAnim === 'sick') this.anim.force('idle')
+    }
 
     this.anim.update(dt, (a: AnimName) => this.images.sprites[a]?.length ?? 1)
 
@@ -321,9 +327,13 @@ export class GameEngine {
   private _select(): void {
     const item = MENU_ITEMS[this.state.menuIndex]
     this.state.menuOpen = false
+    this.debugAnimActive = false
 
     if (item === 'feed') {
       this.stats.hunger = Math.min(4, this.stats.hunger + 1)
+      // 먹였으니 다음 배고픔 감소까지의 시계도 지금부터 다시 시작 —
+      // 안 그러면 채워도 예전 감소 타이머가 그대로 흘러서 방금 채운 직후에 또 깎이는 버그가 있었음
+      this.lastHungerDecay = Date.now() / 1000
       const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
       this.stats.weight = Math.min(maxWeight, this.stats.weight + 1)
       this._bumpAffinity(1)
@@ -333,6 +343,7 @@ export class GameEngine {
     } else if (item === 'pet') {
       if (this.petCooldown <= 0) {
         this.stats.happiness = Math.min(4, this.stats.happiness + 1)
+        this.lastHapDecay = Date.now() / 1000
         this._bumpAffinity(2)
         this.petCooldown = 120
         this.anim.request('happy')
@@ -392,10 +403,12 @@ export class GameEngine {
     if (player === pc) {
       this.state.minigameResult = 'draw'
       this.stats.happiness = Math.min(4, this.stats.happiness + 1)
+      this.lastHapDecay = Date.now() / 1000
       this._bumpAffinity(1)
     } else if (wins[player] === pc) {
       this.state.minigameResult = 'win'
       this.stats.happiness = Math.min(4, this.stats.happiness + 2)
+      this.lastHapDecay = Date.now() / 1000
       this._bumpAffinity(3)
       this.anim.request('happy')
     } else {
@@ -422,6 +435,7 @@ export class GameEngine {
   // ── Debug ──────────────────────────────────────────────────────────────
 
   debugAnim(name: AnimName): void {
+    this.debugAnimActive = true
     this.anim.set(name)
   }
 
@@ -446,6 +460,7 @@ export class GameEngine {
   }
 
   private _restart(): void {
+    this.debugAnimActive = false
     this.stats = { hunger: 4, happiness: 4, affinity: 0, age: 0, weight: BASE_WEIGHT, sick: false, poop_count: 0, alive: true }
     const now = Date.now() / 1000
     this.lastHungerDecay = now

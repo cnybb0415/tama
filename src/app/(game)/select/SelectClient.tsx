@@ -9,9 +9,9 @@ import type { Lang } from '@/lib/lang'
 
 const CHARACTERS = [
   { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/kid/suho_kid_idle_01.png',         available: true },
-  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/kid/idle_01.png',                   available: true },
+  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/kid/ray_kid_idle_01.png',           available: true },
   { id: 'chanyeol', name: 'CHANYEOL', idleImg: '/picture/exo/chanyeol/kid/chanyeol_kid_idle_01.png', available: true },
-  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/kid/dio_kid_idle_01.png',            available: true },
+  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/kid/do_kid_idle_01.png',             available: true },
   { id: 'kai',      name: 'KAI',      idleImg: '/picture/exo/kai/kid/kai_kid_idle_01.png',           available: true },
   { id: 'sehun',    name: 'SEHUN',    idleImg: '/picture/exo/sehun/kid/sehun_kid_idle_01.png',       available: true },
 ]

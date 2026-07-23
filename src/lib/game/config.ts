@@ -45,7 +45,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
     displayName: 'D.O.',
     evolutionDay: 5,
     stages: [
-      { folder: '/picture/exo/do/kid',        prefix: 'dio_kid_',      fileMap: { poop: 'trash', special: 'bedding' },         frameOverrides: { special: 5 }, name: 'D.O. (Kid)'     },
+      { folder: '/picture/exo/do/kid',        prefix: 'do_kid_',       fileMap: { poop: 'trash', special: 'bedding' },         frameOverrides: { special: 5 }, name: 'D.O. (Kid)'     },
       { folder: '/picture/exo/do/adult',      prefix: '',              fileMap: { poop: 'trash', special: 'cooking' },         frameOverrides: {},             name: 'D.O.'           },
     ],
   },
