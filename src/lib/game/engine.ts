@@ -2,11 +2,13 @@ import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COU
 import { CharacterAnim, CharacterImages, stageForAge, affinityTier } from './character'
 import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from './types'
 
-const HUNGER_DECAY  = 30 * 60
-const HAP_DECAY     = 45 * 60
-const HUNGER_DEATH  = 3600
-const HAP_DEATH     = 7200
-const SICK_DEATH    = 7200
+// 배고픔/행복은 이제 실제 경과 시간 기준으로 앱을 며칠 안 켜도 정확히 따라잡힘
+// (나이 계산과 같은 방식) — 그만큼 감소 주기/사망 유예시간은 널널하게 잡음
+const HUNGER_DECAY  = 4  * 60 * 60   // 칸당 4시간 (풀 4칸 → 16시간 만에 0)
+const HAP_DECAY     = 6  * 60 * 60   // 칸당 6시간 (풀 4칸 → 24시간 만에 0)
+const HUNGER_DEATH  = 24 * 60 * 60   // 0인 채로 24시간
+const HAP_DEATH     = 24 * 60 * 60
+const SICK_DEATH    = 24 * 60 * 60
 const POOP_MIN      = 15 * 60
 const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
@@ -138,15 +140,18 @@ export class GameEngine {
     if (this.state.evolveFlash > 0)
       this.state.evolveFlash = Math.max(0, this.state.evolveFlash - dt)
 
-    // Stat decay
-    if (now - this.lastHungerDecay >= HUNGER_DECAY) {
-      this.stats.hunger = Math.max(0, this.stats.hunger - 1)
-      this.lastHungerDecay = now
-    }
-    if (now - this.lastHapDecay >= HAP_DECAY) {
-      this.stats.happiness = Math.max(0, this.stats.happiness - 1)
-      this.lastHapDecay = now
-    }
+    // Stat decay — 실제 경과 시간만큼 한번에 따라잡음 (앱을 오래 안 켜도 정확히 반영).
+    // 이번에 처음 0을 찍었으면 "언제부터 0이었는지"도 역산해서 사망 유예시간이
+    // 오프라인이었던 동안에도 정상적으로 흘러가게 함
+    const hungerTick = this._tickDecay(this.stats.hunger, this.lastHungerDecay, HUNGER_DECAY, now, this.hungerZeroSince)
+    this.stats.hunger = hungerTick.value
+    this.lastHungerDecay = hungerTick.lastDecay
+    this.hungerZeroSince = hungerTick.zeroSince
+
+    const hapTick = this._tickDecay(this.stats.happiness, this.lastHapDecay, HAP_DECAY, now, this.hapZeroSince)
+    this.stats.happiness = hapTick.value
+    this.lastHapDecay = hapTick.lastDecay
+    this.hapZeroSince = hapTick.zeroSince
 
     // Poop
     if (this.poopTimer !== null && now >= this.poopTimer) {
@@ -223,6 +228,25 @@ export class GameEngine {
     this.anim.update(dt, (a: AnimName) => this.images.sprites[a]?.length ?? 1)
 
     this.state.stats = this.stats
+  }
+
+  // 배고픔/행복 감소를 실제 경과 시간(tick 수) 기준으로 한번에 계산.
+  // 이번 호출에서 처음 0을 찍었다면, 정확히 몇 번째 tick에서 0이 됐는지 역산해서
+  // zeroSince를 과거 시점으로 잡아준다 — 그래야 앱을 오래 안 켜서 이미 한참
+  // 0이었던 상태였으면, 다시 켰을 때 사망 유예시간도 그만큼 이미 흘러있다.
+  private _tickDecay(
+    value: number, lastDecay: number, interval: number, now: number, zeroSince: number | null
+  ): { value: number; lastDecay: number; zeroSince: number | null } {
+    const ticks = Math.floor((now - lastDecay) / interval)
+    if (ticks <= 0) return { value, lastDecay, zeroSince }
+
+    const newLastDecay = lastDecay + ticks * interval
+    if (value > 0 && value - ticks <= 0) {
+      const zeroCrossedAt = lastDecay + value * interval
+      return { value: 0, lastDecay: newLastDecay, zeroSince: zeroCrossedAt }
+    }
+    const newValue = Math.max(0, value - ticks)
+    return { value: newValue, lastDecay: newLastDecay, zeroSince: newValue === 0 ? zeroSince : null }
   }
 
   // ── Input ──────────────────────────────────────────────────────────────
