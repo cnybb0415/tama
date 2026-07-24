@@ -51,7 +51,7 @@ export class GameEngine {
   private lastHapDecay    = Date.now() / 1000
   private lastAffinityDecayHunger    = Date.now() / 1000
   private lastAffinityDecayHappiness = Date.now() / 1000
-  private poopTimer: number | null = null
+  private poopTimers: number[] = []
   private petCooldown = 0
   private hungerZeroSince: number | null = null
   private hapZeroSince: number | null = null
@@ -85,7 +85,8 @@ export class GameEngine {
     this.lastHapDecay    = data.last_happiness_decay || Date.now() / 1000
     this.lastAffinityDecayHunger    = data.last_affinity_decay_hunger ?? Date.now() / 1000
     this.lastAffinityDecayHappiness = data.last_affinity_decay_happiness ?? Date.now() / 1000
-    this.poopTimer       = data.poop_timer ?? null
+    // 구버전 세이브(poop_timer 단일값)도 마이그레이션해서 큐에 담아줌
+    this.poopTimers = data.poop_timers ?? (data.poop_timer != null ? [data.poop_timer] : [])
     // 예전 저장 데이터(created_at 없음)는 현재 age를 유지하도록 역산해서 채워줌
     this.createdAt = data.created_at ?? (Date.now() / 1000 - this.stats.age * 86400)
     // death timers reset (no offline death)
@@ -105,7 +106,7 @@ export class GameEngine {
       last_happiness_decay: this.lastHapDecay,
       last_affinity_decay_hunger: this.lastAffinityDecayHunger,
       last_affinity_decay_happiness: this.lastAffinityDecayHappiness,
-      poop_timer: this.poopTimer,
+      poop_timers: this.poopTimers,
       created_at: this.createdAt,
     }
   }
@@ -172,15 +173,23 @@ export class GameEngine {
     this.stats.affinity = affHapTick.affinity
     this.lastAffinityDecayHappiness = affHapTick.lastDecay
 
-    // Poop
-    if (this.poopTimer !== null && now >= this.poopTimer) {
-      this.stats.poop_count++
-      this.poopTimer = null
-      if (this.stats.poop_count >= 2 && !this.stats.sick) {
-        this.stats.sick = true
-        this.sickSince = now
-        this._startDialogue('sick')
+    // Poop — 먹이줄 때마다 독립적으로 예약되므로(큐), 여러 번 먹였으면 여러 개가
+    // 각자의 시간에 따로 나옴 (예전엔 변수 하나뿐이라 재먹이 시 이전 예약이 덮어써졌음)
+    if (this.poopTimers.length > 0) {
+      const remaining: number[] = []
+      for (const t of this.poopTimers) {
+        if (now >= t) {
+          this.stats.poop_count++
+          if (this.stats.poop_count >= 2 && !this.stats.sick) {
+            this.stats.sick = true
+            this.sickSince = now
+            this._startDialogue('sick')
+          }
+        } else {
+          remaining.push(t)
+        }
       }
+      this.poopTimers = remaining
     }
 
     // Death conditions
@@ -372,8 +381,8 @@ export class GameEngine {
       this.state.showStatus = true
       this.state.statusTimer = 4
     } else if (item === 'special') {
-      this._bumpAffinity(2)
-      this.anim.request('special', 'happy')
+      this._bumpAffinity(1)
+      this.anim.request('special')
     } else if (item === 'talk') {
       this._startDialogue('talk')
     }
@@ -421,7 +430,7 @@ export class GameEngine {
   }
 
   private _schedulePoop(): void {
-    this.poopTimer = Date.now() / 1000 + rand(POOP_MIN, POOP_MAX)
+    this.poopTimers.push(Date.now() / 1000 + rand(POOP_MIN, POOP_MAX))
   }
 
   private _die(): void {
@@ -468,7 +477,7 @@ export class GameEngine {
     this.lastAffinityDecayHunger = now
     this.lastAffinityDecayHappiness = now
     this.createdAt = now
-    this.poopTimer = null
+    this.poopTimers = []
     this.hungerZeroSince = null
     this.hapZeroSince = null
     this.sickSince = null

@@ -93,6 +93,9 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
           <NotifyToggle
             labelOn={t.notifyOn}
             labelOff={t.notifyOff}
+            labelTest={t.notifyTest}
+            labelTestSent={t.notifyTestSent}
+            labelTestFail={t.notifyTestFail}
             style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: 'rgba(255,255,255,0.7)' }}
           />
           {isAdmin && (

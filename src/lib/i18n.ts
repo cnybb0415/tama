@@ -81,6 +81,9 @@ export const T = {
     privacyLine2: 'Retention: deleted on withdrawal',
     notifyOn:    'Alerts on',
     notifyOff:   'Get alerts',
+    notifyTest:      'Test',
+    notifyTestSent:  'Test notification sent',
+    notifyTestFail:  'Failed to send',
   },
   ko: {
     menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '상태', '스페셜', '대화'],
@@ -164,6 +167,9 @@ export const T = {
     privacyLine2: '보관: 회원 탈퇴 시 삭제',
     notifyOn:    '알림 켜짐',
     notifyOff:   '알림 받기',
+    notifyTest:      '테스트',
+    notifyTestSent:  '테스트 알림을 보냈어요',
+    notifyTestFail:  '전송 실패',
   },
 } as const
 
