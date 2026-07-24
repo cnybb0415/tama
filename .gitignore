@@ -39,6 +39,7 @@ yarn-error.log*
 # private reference material — not app assets, never serve publicly
 /public/picture/talk
 /public/picture/talk.zip
+/public/picture/exo/원본
 
 # typescript
 *.tsbuildinfo
