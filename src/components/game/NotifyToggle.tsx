@@ -12,17 +12,13 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
 interface Props {
   labelOn: string
   labelOff: string
-  labelTest: string
-  labelTestSent: string
-  labelTestFail: string
   style: React.CSSProperties
 }
 
-export default function NotifyToggle({ labelOn, labelOff, labelTest, labelTestSent, labelTestFail, style }: Props) {
+export default function NotifyToggle({ labelOn, labelOff, style }: Props) {
   const [supported, setSupported] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [testMsg, setTestMsg] = useState('')
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
@@ -70,31 +66,9 @@ export default function NotifyToggle({ labelOn, labelOff, labelTest, labelTestSe
     }
   }
 
-  const sendTest = async () => {
-    if (busy) return
-    setBusy(true)
-    setTestMsg('')
-    try {
-      const res = await fetch('/api/push/test', { method: 'POST' })
-      setTestMsg(res.ok ? labelTestSent : labelTestFail)
-    } catch {
-      setTestMsg(labelTestFail)
-    } finally {
-      setBusy(false)
-      setTimeout(() => setTestMsg(''), 3000)
-    }
-  }
-
   return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <button onClick={toggle} disabled={busy} style={style}>
-        {subscribed ? `🔔 ${labelOn}` : `🔕 ${labelOff}`}
-      </button>
-      {subscribed && (
-        <button onClick={sendTest} disabled={busy} style={style}>
-          {testMsg || labelTest}
-        </button>
-      )}
-    </span>
+    <button onClick={toggle} disabled={busy} style={style}>
+      {subscribed ? `🔔 ${labelOn}` : `🔕 ${labelOff}`}
+    </button>
   )
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CHARACTER_CONFIGS } from '@/lib/game/config'
+import { validateSaveData } from '@/lib/game/validateSave'
 
 type Params = { params: Promise<{ character: string }> }
 
@@ -50,13 +51,19 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!body.save || typeof body.save !== 'object')
     return NextResponse.json({ error: 'Invalid save data' }, { status: 400 })
 
+  // 스탯 값이 게임 로직상 나올 수 있는 범위인지 검증 — 안 그러면 로그인한 본인 계정으로
+  // curl을 직접 쳐서 배고픔/친밀도/체중/생존여부 등을 마음대로 조작할 수 있었음
+  const validated = validateSaveData(body.save)
+  if (!validated)
+    return NextResponse.json({ error: 'Invalid save data' }, { status: 400 })
+
   // 쓰기: admin client (service role) 사용, user_id는 서버에서 직접 지정
   // → 클라이언트가 다른 user_id를 임의로 넣을 수 없음
   const admin = createAdminClient()
   const { error } = await admin.from('game_saves').upsert({
     user_id: user.id,          // 서버에서 확인한 user_id만 사용
     character_type: character,
-    save_data: body.save,
+    save_data: validated,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id,character_type' })
 

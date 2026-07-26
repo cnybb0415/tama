@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@/lib/supabase/client'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
@@ -22,14 +21,19 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const supabase = createBrowserClient()
-    const email = `${username.trim().toLowerCase()}@reverxe.game`
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-    if (err) {
-      setError('Invalid username or password')
-      setLoading(false)
-    } else {
+
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    })
+
+    if (res.ok) {
       router.push('/select')
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setError(res.status === 429 ? (data.error ?? 'Too many attempts. Try again later.') : 'Invalid username or password')
+      setLoading(false)
     }
   }
 
@@ -129,11 +133,10 @@ export default function LoginPage() {
 
           <input
             type="password"
-            inputMode="numeric"
-            maxLength={6}
-            style={{ ...inputStyle, letterSpacing: 2 }}
+            maxLength={72}
+            style={{ ...inputStyle, letterSpacing: 1 }}
             value={password}
-            onChange={e => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={e => setPassword(e.target.value.slice(0, 72))}
             placeholder="Password"
             autoComplete="current-password"
             required

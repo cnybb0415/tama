@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@/lib/supabase/client'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
+import { USERNAME_RE, PASSWORD_RE } from '@/lib/authValidation'
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
 
@@ -20,9 +20,9 @@ export default function RegisterPage() {
   const [loading, setLoading]   = useState(false)
 
   const validate = (): string => {
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return 'Username: 3-20 chars (a-z, 0-9, _)'
-    if (!/^\d{6}$/.test(password))               return 'Password: 6 digits required'
-    if (password !== confirm)                     return 'Passwords do not match'
+    if (!USERNAME_RE.test(username)) return 'Username: 3-20 chars (a-z, 0-9, _)'
+    if (!PASSWORD_RE.test(password)) return 'Password: 8+ chars, must include a letter'
+    if (password !== confirm)        return 'Passwords do not match'
     return ''
   }
 
@@ -32,22 +32,18 @@ export default function RegisterPage() {
     if (err) { setError(err); return }
     setError(''); setLoading(true)
 
-    const supabase = createBrowserClient()
-    const email = `${username.trim().toLowerCase()}@reverxe.game`
-    const { error: signUpErr } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { username: username.trim().toLowerCase() } },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
     })
 
-    if (signUpErr) {
-      if (signUpErr.message.includes('already registered'))
-        setError('Username already taken')
-      else
-        setError('Sign up failed')
-      setLoading(false)
-    } else {
+    if (res.ok) {
       router.push('/select')
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setError(res.status === 429 ? (data.error ?? 'Too many attempts. Try again later.') : 'Sign up failed')
+      setLoading(false)
     }
   }
 
@@ -157,11 +153,10 @@ export default function RegisterPage() {
 
           <input
             type="password"
-            inputMode="numeric"
-            maxLength={6}
-            style={{ ...inputStyle, letterSpacing: 2 }}
+            maxLength={72}
+            style={{ ...inputStyle, letterSpacing: 1 }}
             value={password}
-            onChange={e => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={e => setPassword(e.target.value.slice(0, 72))}
             placeholder="Password"
             autoComplete="new-password"
             required
@@ -169,11 +164,10 @@ export default function RegisterPage() {
 
           <input
             type="password"
-            inputMode="numeric"
-            maxLength={6}
-            style={{ ...inputStyle, letterSpacing: 2 }}
+            maxLength={72}
+            style={{ ...inputStyle, letterSpacing: 1 }}
             value={confirm}
-            onChange={e => setConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={e => setConfirm(e.target.value.slice(0, 72))}
             placeholder="Confirm"
             autoComplete="new-password"
             required

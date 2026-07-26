@@ -4,8 +4,8 @@ import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from 
 
 // 배고픔/행복은 이제 실제 경과 시간 기준으로 앱을 며칠 안 켜도 정확히 따라잡힘
 // (나이 계산과 같은 방식) — 그만큼 감소 주기/사망 유예시간은 널널하게 잡음
-const HUNGER_DECAY  = 4  * 60 * 60   // 칸당 4시간 (풀 4칸 → 16시간 만에 0)
-const HAP_DECAY     = 6  * 60 * 60   // 칸당 6시간 (풀 4칸 → 24시간 만에 0)
+export const HUNGER_DECAY = 4  * 60 * 60   // 칸당 4시간 (풀 4칸 → 16시간 만에 0)
+export const HAP_DECAY    = 6  * 60 * 60   // 칸당 6시간 (풀 4칸 → 24시간 만에 0)
 const HUNGER_DEATH  = 12 * 60 * 60   // 0인 채로 12시간
 const HAP_DEATH     = 12 * 60 * 60
 const SICK_DEATH    = 12 * 60 * 60
@@ -13,6 +13,9 @@ const POOP_MIN      = 15 * 60
 const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
 const WALK_MAX      = 10
+// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~아침 7시
+const NIGHT_START_HOUR = 1
+const NIGHT_END_HOUR   = 7
 
 export class GameEngine {
   characterType: string
@@ -49,6 +52,9 @@ export class GameEngine {
 
   private lastHungerDecay = Date.now() / 1000
   private lastHapDecay    = Date.now() / 1000
+  // 아직 한 tick(interval)에 못 미치는 자투리 "활성 시간"(초) — 밤을 건너뛰고 남는 나머지
+  private hungerDecayAccum = 0
+  private hapDecayAccum    = 0
   private lastAffinityDecayHunger    = Date.now() / 1000
   private lastAffinityDecayHappiness = Date.now() / 1000
   private poopTimers: number[] = []
@@ -83,6 +89,8 @@ export class GameEngine {
     if (this.stats.affinity == null) this.stats.affinity = 0
     this.lastHungerDecay = data.last_hunger_decay || Date.now() / 1000
     this.lastHapDecay    = data.last_happiness_decay || Date.now() / 1000
+    this.hungerDecayAccum = data.hunger_decay_accum ?? 0
+    this.hapDecayAccum    = data.happiness_decay_accum ?? 0
     this.lastAffinityDecayHunger    = data.last_affinity_decay_hunger ?? Date.now() / 1000
     this.lastAffinityDecayHappiness = data.last_affinity_decay_happiness ?? Date.now() / 1000
     // 구버전 세이브(poop_timer 단일값)도 마이그레이션해서 큐에 담아줌
@@ -104,6 +112,8 @@ export class GameEngine {
       stats: this.stats,
       last_hunger_decay: this.lastHungerDecay,
       last_happiness_decay: this.lastHapDecay,
+      hunger_decay_accum: this.hungerDecayAccum,
+      happiness_decay_accum: this.hapDecayAccum,
       last_affinity_decay_hunger: this.lastAffinityDecayHunger,
       last_affinity_decay_happiness: this.lastAffinityDecayHappiness,
       poop_timers: this.poopTimers,
@@ -153,14 +163,16 @@ export class GameEngine {
     // Stat decay — 실제 경과 시간만큼 한번에 따라잡음 (앱을 오래 안 켜도 정확히 반영).
     // 이번에 처음 0을 찍었으면 "언제부터 0이었는지"도 역산해서 사망 유예시간이
     // 오프라인이었던 동안에도 정상적으로 흘러가게 함
-    const hungerTick = this._tickDecay(this.stats.hunger, this.lastHungerDecay, HUNGER_DECAY, now, this.hungerZeroSince)
+    const hungerTick = this._tickDecay(this.stats.hunger, this.lastHungerDecay, this.hungerDecayAccum, HUNGER_DECAY, now, this.hungerZeroSince)
     this.stats.hunger = hungerTick.value
-    this.lastHungerDecay = hungerTick.lastDecay
+    this.lastHungerDecay = hungerTick.lastSync
+    this.hungerDecayAccum = hungerTick.accum
     this.hungerZeroSince = hungerTick.zeroSince
 
-    const hapTick = this._tickDecay(this.stats.happiness, this.lastHapDecay, HAP_DECAY, now, this.hapZeroSince)
+    const hapTick = this._tickDecay(this.stats.happiness, this.lastHapDecay, this.hapDecayAccum, HAP_DECAY, now, this.hapZeroSince)
     this.stats.happiness = hapTick.value
-    this.lastHapDecay = hapTick.lastDecay
+    this.lastHapDecay = hapTick.lastSync
+    this.hapDecayAccum = hapTick.accum
     this.hapZeroSince = hapTick.zeroSince
 
     // 친밀도 감소 — 배고픔/행복이 THRESHOLD 밑으로 떨어져 있는 동안, 얼마나
@@ -249,13 +261,19 @@ export class GameEngine {
       }
     }
 
-    // State-driven animations — sick/sad는 조건이 풀려도 저절로 idle로 안 돌아오므로
-    // (sad/sick은 loop 애니메이션이라 계속 반복될 뿐) 명시적으로 idle로 되돌려줘야 함.
-    // 단, 디버그로 미리보기 중이면 실제 스탯과 무관하게 고른 애니메이션을 그대로 유지
+    // State-driven animations — sick/sad/sleep은 조건이 풀려도 저절로 idle로 안 돌아오므로
+    // (전부 loop 애니메이션이라 계속 반복될 뿐) 명시적으로 idle로 되돌려줘야 함.
+    // 단, 디버그로 미리보기 중이면 실제 스탯과 무관하게 고른 애니메이션을 그대로 유지.
+    // 우선순위: 아픔 > 배고픔/행복 0(sad) > 심야 시간대(sleep) — 위급한 상태는 자는 동안에도 보이게 함
     if (!this.debugAnimActive) {
+      const hour = new Date(now * 1000).getHours()
+      const isNight = hour >= NIGHT_START_HOUR && hour < NIGHT_END_HOUR
+
       if (this.stats.sick) this.anim.force('sick')
       else if (this.stats.hunger === 0 || this.stats.happiness === 0) this.anim.force('sad')
-      else if (this.anim.currentAnim === 'sad' || this.anim.currentAnim === 'sick') this.anim.force('idle')
+      else if (isNight) this.anim.force('sleep')
+      else if (this.anim.currentAnim === 'sad' || this.anim.currentAnim === 'sick' || this.anim.currentAnim === 'sleep')
+        this.anim.force('idle')
     }
 
     this.anim.update(dt, (a: AnimName) => this.images.sprites[a]?.length ?? 1)
@@ -263,23 +281,27 @@ export class GameEngine {
     this.state.stats = this.stats
   }
 
-  // 배고픔/행복 감소를 실제 경과 시간(tick 수) 기준으로 한번에 계산.
-  // 이번 호출에서 처음 0을 찍었다면, 정확히 몇 번째 tick에서 0이 됐는지 역산해서
-  // zeroSince를 과거 시점으로 잡아준다 — 그래야 앱을 오래 안 켜서 이미 한참
-  // 0이었던 상태였으면, 다시 켰을 때 사망 유예시간도 그만큼 이미 흘러있다.
+  // 배고픔/행복 감소를 "심야 시간대를 제외한 활성 시간" 기준으로 계산 — 자는 동안(로컬
+  // 새벽 1시~7시)은 시계가 멈춘 것처럼 취급됨. lastSync는 매 호출마다 now로 갱신하고,
+  // 아직 한 tick(interval)에 못 미치는 자투리 활성 시간은 accum에 그대로 이월해서 다음
+  // 호출에 합산 — 그래서 "언제 tick이 발생했는지"를 시각으로 되짚을 필요가 없어짐.
+  // 처음 0을 찍는 순간에는, 정확히 몇 번째 tick에서 0이 됐는지를 활성 시간 기준으로
+  // 역산(advanceByActiveSeconds)해서 사망 유예시간이 오프라인 중에도 정상적으로 흘러가게 함.
   private _tickDecay(
-    value: number, lastDecay: number, interval: number, now: number, zeroSince: number | null
-  ): { value: number; lastDecay: number; zeroSince: number | null } {
-    const ticks = Math.floor((now - lastDecay) / interval)
-    if (ticks <= 0) return { value, lastDecay, zeroSince }
+    value: number, lastSync: number, accum: number, interval: number, now: number, zeroSince: number | null
+  ): { value: number; lastSync: number; accum: number; zeroSince: number | null } {
+    const totalActive = accum + activeSecondsBetween(lastSync, now)
+    const ticks = Math.floor(totalActive / interval)
+    const newAccum = totalActive - ticks * interval
+    if (ticks <= 0) return { value, lastSync: now, accum: newAccum, zeroSince }
 
-    const newLastDecay = lastDecay + ticks * interval
     if (value > 0 && value - ticks <= 0) {
-      const zeroCrossedAt = lastDecay + value * interval
-      return { value: 0, lastDecay: newLastDecay, zeroSince: zeroCrossedAt }
+      const neededActive = value * interval - accum
+      const zeroCrossedAt = advanceByActiveSeconds(lastSync, neededActive)
+      return { value: 0, lastSync: now, accum: newAccum, zeroSince: zeroCrossedAt }
     }
     const newValue = Math.max(0, value - ticks)
-    return { value: newValue, lastDecay: newLastDecay, zeroSince: newValue === 0 ? zeroSince : null }
+    return { value: newValue, lastSync: now, accum: newAccum, zeroSince: newValue === 0 ? zeroSince : null }
   }
 
   // 배고픔/행복 값이 AFFINITY_DECAY_THRESHOLD 이상이면 감소 없음(타이머만 리셋).
@@ -343,6 +365,7 @@ export class GameEngine {
       // 먹였으니 다음 배고픔 감소까지의 시계도 지금부터 다시 시작 —
       // 안 그러면 채워도 예전 감소 타이머가 그대로 흘러서 방금 채운 직후에 또 깎이는 버그가 있었음
       this.lastHungerDecay = Date.now() / 1000
+      this.hungerDecayAccum = 0
       const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
       this.stats.weight = Math.min(maxWeight, this.stats.weight + 1)
       this._bumpAffinity(1)
@@ -353,6 +376,7 @@ export class GameEngine {
       if (this.petCooldown <= 0) {
         this.stats.happiness = Math.min(4, this.stats.happiness + 1)
         this.lastHapDecay = Date.now() / 1000
+        this.hapDecayAccum = 0
         this._bumpAffinity(2)
         this.petCooldown = 120
         this.anim.request('happy')
@@ -413,11 +437,13 @@ export class GameEngine {
       this.state.minigameResult = 'draw'
       this.stats.happiness = Math.min(4, this.stats.happiness + 1)
       this.lastHapDecay = Date.now() / 1000
+      this.hapDecayAccum = 0
       this._bumpAffinity(1)
     } else if (wins[player] === pc) {
       this.state.minigameResult = 'win'
       this.stats.happiness = Math.min(4, this.stats.happiness + 2)
       this.lastHapDecay = Date.now() / 1000
+      this.hapDecayAccum = 0
       this._bumpAffinity(3)
       this.anim.request('happy')
     } else {
@@ -474,6 +500,8 @@ export class GameEngine {
     const now = Date.now() / 1000
     this.lastHungerDecay = now
     this.lastHapDecay = now
+    this.hungerDecayAccum = 0
+    this.hapDecayAccum = 0
     this.lastAffinityDecayHunger = now
     this.lastAffinityDecayHappiness = now
     this.createdAt = now
@@ -500,4 +528,62 @@ export class GameEngine {
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min)
+}
+
+// [fromEpoch, toEpoch) 구간에서 심야 시간대(로컬 기준 NIGHT_START_HOUR~NIGHT_END_HOUR)를
+// 제외한 "활성 시간"(초). 하루 단위로 순회하며 그날의 심야 구간과 겹치는 만큼만 빼줌 —
+// 오프라인으로 며칠 지나 여러 밤을 거쳤어도 정확히 반영됨
+function activeSecondsBetween(fromEpoch: number, toEpoch: number): number {
+  if (toEpoch <= fromEpoch) return 0
+  let total = 0
+  let cursor = new Date(fromEpoch * 1000)
+  let dayStart = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate())
+
+  while (dayStart.getTime() / 1000 < toEpoch) {
+    const dayStartSec = dayStart.getTime() / 1000
+    const nightStart = dayStartSec + NIGHT_START_HOUR * 3600
+    const nightEnd = dayStartSec + NIGHT_END_HOUR * 3600
+    const segStart = Math.max(dayStartSec, fromEpoch)
+    const segEnd = Math.min(dayStartSec + 86400, toEpoch)
+
+    const nightOverlapStart = Math.max(nightStart, segStart)
+    const nightOverlapEnd = Math.min(nightEnd, segEnd)
+    const nightOverlap = Math.max(0, nightOverlapEnd - nightOverlapStart)
+
+    total += Math.max(0, segEnd - segStart) - nightOverlap
+    dayStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate() + 1)
+  }
+  return total
+}
+
+// fromEpoch부터 "활성 시간" targetActiveSeconds만큼 지난 실제(벽시계) 시각을 찾음.
+// activeSecondsBetween과 같은 심야 구간 규칙으로, 심야는 건너뛰며 전진 — 배고픔/행복이
+// 정확히 몇 시에 0을 찍었는지(오프라인 구간 포함) 역산하는 데 사용
+function advanceByActiveSeconds(fromEpoch: number, targetActiveSeconds: number): number {
+  let remaining = targetActiveSeconds
+  let cursor = fromEpoch
+  if (remaining <= 0) return cursor
+
+  while (remaining > 0) {
+    const d = new Date(cursor * 1000)
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 1000
+    const nightStart = dayStart + NIGHT_START_HOUR * 3600
+    const nightEnd = dayStart + NIGHT_END_HOUR * 3600
+    const dayEnd = dayStart + 86400
+
+    if (cursor < nightStart) {
+      const seg = nightStart - cursor
+      if (seg >= remaining) return cursor + remaining
+      remaining -= seg
+      cursor = nightEnd
+    } else if (cursor < nightEnd) {
+      cursor = nightEnd
+    } else {
+      const seg = dayEnd - cursor
+      if (seg >= remaining) return cursor + remaining
+      remaining -= seg
+      cursor = dayEnd
+    }
+  }
+  return cursor
 }
