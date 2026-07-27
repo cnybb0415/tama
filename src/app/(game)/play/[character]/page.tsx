@@ -15,15 +15,23 @@ export default async function PlayPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data } = await supabase
-    .from('game_saves')
-    .select('save_data')
-    .eq('user_id', user.id)
-    .eq('character_type', character)
-    .single()
+  const [{ data }, { data: profile }] = await Promise.all([
+    supabase
+      .from('game_saves')
+      .select('save_data')
+      .eq('user_id', user.id)
+      .eq('character_type', character)
+      .single(),
+    supabase
+      .from('profiles')
+      .select('muted_characters')
+      .eq('id', user.id)
+      .single(),
+  ])
 
   const save = (data?.save_data as SaveData) ?? null
   const username = (user.user_metadata?.username as string) ?? ''
+  const muted = ((profile?.muted_characters as string[]) ?? []).includes(character)
 
-  return <PlayClient characterType={character} initialSave={save} isAdmin={username === 'admin'} />
+  return <PlayClient characterType={character} initialSave={save} isAdmin={username === 'admin'} initialMuted={muted} />
 }

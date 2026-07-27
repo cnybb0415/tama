@@ -123,6 +123,7 @@ export class GameEngine {
 
   update(dt: number): void {
     const now = Date.now() / 1000
+    const isNight = this._isNight(now)
 
     for (const k of Object.keys(this.state.btnFlash)) {
       this.state.btnFlash[k] = Math.max(0, this.state.btnFlash[k] - dt)
@@ -250,8 +251,10 @@ export class GameEngine {
       }
     }
 
-    // 캐릭터가 먼저 말 거는 잡담 — 친밀도가 높을수록 더 자주 말을 검
-    if (!this.state.menuOpen && !this.state.minigameActive && !this.state.showStatus && this.state.dialogueTier === null) {
+    // 캐릭터가 먼저 말 거는 잡담 — 친밀도가 높을수록 더 자주 말을 검.
+    // 심야(수면 중)엔 자다가 갑자기 말을 거는 게 어색해서 아예 안 뜨게 함 —
+    // 타이머는 계속 쌓이다가 아침이 되면 그때 정상적으로 발생함
+    if (!this.state.menuOpen && !this.state.minigameActive && !this.state.showStatus && this.state.dialogueTier === null && !isNight) {
       this.idleChatTimer += dt
       if (this.idleChatTimer >= this.idleChatInterval) {
         this.idleChatTimer = 0
@@ -266,9 +269,6 @@ export class GameEngine {
     // 단, 디버그로 미리보기 중이면 실제 스탯과 무관하게 고른 애니메이션을 그대로 유지.
     // 우선순위: 아픔 > 배고픔/행복 0(sad) > 심야 시간대(sleep) — 위급한 상태는 자는 동안에도 보이게 함
     if (!this.debugAnimActive) {
-      const hour = new Date(now * 1000).getHours()
-      const isNight = hour >= NIGHT_START_HOUR && hour < NIGHT_END_HOUR
-
       if (this.stats.sick) this.anim.force('sick')
       else if (this.stats.hunger === 0 || this.stats.happiness === 0) this.anim.force('sad')
       else if (isNight) this.anim.force('sleep')
@@ -319,6 +319,12 @@ export class GameEngine {
     return { affinity: Math.max(0, this.stats.affinity - ticks), lastDecay: lastDecay + ticks * interval }
   }
 
+  // 각자 기기의 로컬 시간 기준 심야(수면) 시간대 여부
+  private _isNight(now: number): boolean {
+    const hour = new Date(now * 1000).getHours()
+    return hour >= NIGHT_START_HOUR && hour < NIGHT_END_HOUR
+  }
+
   // ── Input ──────────────────────────────────────────────────────────────
 
   btnLeft(): void {
@@ -359,6 +365,7 @@ export class GameEngine {
     const item = MENU_ITEMS[this.state.menuIndex]
     this.state.menuOpen = false
     this.debugAnimActive = false
+    const isNight = this._isNight(Date.now() / 1000)
 
     if (item === 'feed') {
       this.stats.hunger = Math.min(4, this.stats.hunger + 1)
@@ -371,7 +378,8 @@ export class GameEngine {
       this._bumpAffinity(1)
       this._schedulePoop()
       this.anim.request('eat', 'happy')
-      if (Math.random() < REACTION_CHANCE) this._startDialogue('feed')
+      // 심야엔 자다가 반응 대사가 뜨는 게 어색해서 생략 (스탯/친밀도 반영은 그대로)
+      if (!isNight && Math.random() < REACTION_CHANCE) this._startDialogue('feed')
     } else if (item === 'pet') {
       if (this.petCooldown <= 0) {
         this.stats.happiness = Math.min(4, this.stats.happiness + 1)
@@ -380,7 +388,7 @@ export class GameEngine {
         this._bumpAffinity(2)
         this.petCooldown = 120
         this.anim.request('happy')
-        if (Math.random() < REACTION_CHANCE) this._startDialogue('pet')
+        if (!isNight && Math.random() < REACTION_CHANCE) this._startDialogue('pet')
       }
     } else if (item === 'play') {
       this.state.minigameActive = true
@@ -479,7 +487,11 @@ export class GameEngine {
   }
 
   debugWeight(value: number): void {
-    this.stats.weight = Math.max(0, value)
+    // 서버 저장 검증(validateSaveData)이 나이 기준 최대치를 강제하므로, 여기서도
+    // 그 상한을 넘지 않게 해야 함 — 안 그러면 이후 모든 저장이 조용히 거부되는
+    // 버그가 있었음 (age를 포함한 세이브 전체가 매번 통째로 거부됨)
+    const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
+    this.stats.weight = Math.max(0, Math.min(maxWeight, value))
   }
 
   async debugStage(stage: number): Promise<void> {
@@ -491,6 +503,9 @@ export class GameEngine {
     this.stats.age = targetAge
     // createdAt도 함께 맞춰줘야 다음 update() tick에서 age가 즉시 원래대로 재계산되지 않음
     this.createdAt = Date.now() / 1000 - targetAge * 86400
+    // ANIM 미리보기 중이었다면 그 잠금을 풀어줘야 함 — 안 그러면 이후 실제 스탯이
+    // sick/sad/sleep이어도 계속 idle로 고정된 채 안 바뀌는 버그가 있었음
+    this.debugAnimActive = false
     this.anim.set('idle')
   }
 
@@ -541,17 +556,20 @@ export function activeSecondsBetween(fromEpoch: number, toEpoch: number): number
 
   while (dayStart.getTime() / 1000 < toEpoch) {
     const dayStartSec = dayStart.getTime() / 1000
-    const nightStart = dayStartSec + NIGHT_START_HOUR * 3600
-    const nightEnd = dayStartSec + NIGHT_END_HOUR * 3600
+    // 자정 기준 +N시간 대신 달력 시/분으로 직접 구성 — 서머타임(DST) 있는 나라에서
+    // 하루가 23/25시간이 되는 날에도 시/분 표시가 어긋나지 않게 함
+    const nightStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate(), NIGHT_START_HOUR).getTime() / 1000
+    const nightEnd = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate(), NIGHT_END_HOUR).getTime() / 1000
+    const nextDayStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate() + 1)
     const segStart = Math.max(dayStartSec, fromEpoch)
-    const segEnd = Math.min(dayStartSec + 86400, toEpoch)
+    const segEnd = Math.min(nextDayStart.getTime() / 1000, toEpoch)
 
     const nightOverlapStart = Math.max(nightStart, segStart)
     const nightOverlapEnd = Math.min(nightEnd, segEnd)
     const nightOverlap = Math.max(0, nightOverlapEnd - nightOverlapStart)
 
     total += Math.max(0, segEnd - segStart) - nightOverlap
-    dayStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate() + 1)
+    dayStart = nextDayStart
   }
   return total
 }
@@ -566,10 +584,12 @@ function advanceByActiveSeconds(fromEpoch: number, targetActiveSeconds: number):
 
   while (remaining > 0) {
     const d = new Date(cursor * 1000)
-    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 1000
-    const nightStart = dayStart + NIGHT_START_HOUR * 3600
-    const nightEnd = dayStart + NIGHT_END_HOUR * 3600
-    const dayEnd = dayStart + 86400
+    const dayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    // 자정 기준 +N시간 대신 달력 시/분으로 직접 구성 — DST로 하루가 23/25시간이 되는
+    // 날에도 시/분 표시가 어긋나지 않게 함 (activeSecondsBetween과 동일한 방식)
+    const nightStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), NIGHT_START_HOUR).getTime() / 1000
+    const nightEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), NIGHT_END_HOUR).getTime() / 1000
+    const dayEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate() + 1).getTime() / 1000
 
     if (cursor < nightStart) {
       const seg = nightStart - cursor

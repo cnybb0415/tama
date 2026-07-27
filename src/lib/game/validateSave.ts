@@ -5,7 +5,10 @@ import type { SaveData } from './types'
 const MAX_AGE_DAYS = 3650          // 10년 — 말이 안 되는 값만 걸러내는 넉넉한 상한
 const MAX_POOP_COUNT = 50
 const MAX_POOP_TIMERS = 20
-const FUTURE_TOLERANCE = 5 * 60    // 클라이언트-서버 시계 오차 허용치(초)
+const FUTURE_TOLERANCE = 30 * 60   // 클라이언트-서버 시계 오차 허용치(초) — 실제 기기
+                                    // 시계 오차로 정상 저장이 거부되는 걸 막기 위해 넉넉하게 잡음.
+                                    // 치트로 의미 있으려면 몇 시간~며칠 단위가 필요해서 30분 정도
+                                    // 여유를 줘도 "감소 영구 정지" 같은 조작 방지 효과는 그대로임
 const PAST_FLOOR = 1577836800      // 2020-01-01 — 이보다 과거 타임스탬프는 값 오염으로 간주
 
 function isFiniteNum(v: unknown): v is number {

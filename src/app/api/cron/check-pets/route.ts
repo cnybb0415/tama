@@ -67,16 +67,31 @@ export async function GET(req: NextRequest) {
   }
   const subUserIds = [...subsByUser.keys()]
 
-  const saveChunks = await Promise.all(
-    chunk(subUserIds, QUERY_CHUNK).map(ids =>
-      admin.from('game_saves').select('user_id, character_type, save_data, updated_at').in('user_id', ids)
-    )
-  )
-  if (saveChunks.some(r => r.error)) return NextResponse.json({ error: 'DB error' }, { status: 500 })
+  const [saveChunks, profileChunks] = await Promise.all([
+    Promise.all(
+      chunk(subUserIds, QUERY_CHUNK).map(ids =>
+        admin.from('game_saves').select('user_id, character_type, save_data, updated_at').in('user_id', ids)
+      )
+    ),
+    Promise.all(
+      chunk(subUserIds, QUERY_CHUNK).map(ids =>
+        admin.from('profiles').select('id, muted_characters').in('id', ids)
+      )
+    ),
+  ])
+  if (saveChunks.some(r => r.error) || profileChunks.some(r => r.error))
+    return NextResponse.json({ error: 'DB error' }, { status: 500 })
   const saves = saveChunks.flatMap(r => r.data ?? [])
+
+  // 유저별로 뮤트한 캐릭터 목록 — 알림 대상에서 제외하기 위함
+  const mutedByUser = new Map<string, Set<string>>()
+  for (const p of profileChunks.flatMap(r => r.data ?? [])) {
+    mutedByUser.set(p.id as string, new Set((p.muted_characters as string[]) ?? []))
+  }
 
   const needyByUser = new Map<string, { character: string; reason: string }[]>()
   for (const row of saves) {
+    if (mutedByUser.get(row.user_id)?.has(row.character_type)) continue
     const reason = needsAttention(row.save_data as SaveData, row.updated_at as string)
     if (!reason) continue
     const list = needyByUser.get(row.user_id) ?? []

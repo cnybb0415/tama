@@ -3,8 +3,14 @@
 create table if not exists profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   username text unique not null,
+  -- 알림을 받고 싶지 않은 캐릭터 목록(character_type) — 계정 전체 알림은 켠 채로
+  -- 특정 멤버만 뮤트할 수 있게
+  muted_characters text[] not null default '{}',
   created_at timestamptz default now()
 );
+
+-- 이미 배포된 DB에도 반영 (기존 테이블에는 create table if not exists가 안 먹으므로)
+alter table profiles add column if not exists muted_characters text[] not null default '{}';
 
 create table if not exists game_saves (
   id uuid default gen_random_uuid() primary key,

@@ -1,6 +1,6 @@
 export const T = {
   en: {
-    menu:        ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Status', 'Special', 'Talk'],
+    menu:        ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Special', 'Talk', 'Status'],
     hunger:      'Hunger',
     happy:       'Happy',
     affinity:    'Affinity',
@@ -81,9 +81,11 @@ export const T = {
     privacyLine2: 'Retention: deleted on withdrawal',
     notifyOn:    'Alerts on',
     notifyOff:   'Get alerts',
+    muteThis:    'Mute this one',
+    unmuteThis:  'Unmute',
   },
   ko: {
-    menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '상태', '스페셜', '대화'],
+    menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '스페셜', '대화', '상태'],
     hunger:      '배고픔',
     happy:       '행복',
     affinity:    '친밀도',
@@ -164,6 +166,8 @@ export const T = {
     privacyLine2: '보관: 회원 탈퇴 시 삭제',
     notifyOn:    '알림 켜짐',
     notifyOff:   '알림 받기',
+    muteThis:    '이 멤버 뮤트',
+    unmuteThis:  '뮤트 해제',
   },
 } as const
 
@@ -409,7 +413,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
         ['...', '(수줍게 웃음)', '음...', '...', '(조용히 바라봄)'],
         ['今天练了会儿舞 (오늘 춤 연습 좀 하고 왔어)', '要么就不做，一做就做最好 (안 하면 몰라도, 하면 최고로 해야지)', '심심한데 같이 있을래', '你今天过得怎么样? (오늘 하루 어땠어?)', '나랑 잠깐 얘기할래'],
         ['我一直在等你 (너를 기다리고 있었어)', '我真的很想你 (보고싶었어, 정말로)', '今年也没怎么休息 (올해도 얼마 못쉬었어)', '너랑 있으면 시간이 느리게 가는것 같아', '오늘도 조용히 행복했어'],
-        ['我们一起走，然后各自幸福 (우리 같이 걷다가, 각자 행복하자)', '내 마음은 늘 너를 향해 있어', '우리의 마음은 변하지 않을거야', '你对我来说真的很珍贵 (너는 나에게 정말 소중해)', '谢谢你 (고마워, 진심으로)'],
+        ['我们一起走，然后各自幸福 (우리 같이 걷다가, 각자 행복하자)', '내 마음은 늘 너를 향해 있어', '우리의 마음은 변하지 않을거야', '你对我来说真的很珍贵 (너는 나에게 정말 소중해)', '谢谢你 (고마워, 진심으로)', '从开场到散场的每一句生日祝福都有听见，也放在了心里 (공연 시작부터 끝까지 들려준 생일 축하 인사, 다 듣고 마음에 담아뒀어)'],
       ],
       idle: [
         ['...', '(딴청)', '음...', '(하늘을 바라봄)'],
@@ -447,7 +451,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
         ['...', '(smiles shyly)', 'Hmm...', '...', '(quietly watching)'],
         ['今天练了会儿舞 (Did a bit of dance practice today)', "要么就不做，一做就做最好 (If I'm going to do it, I do it best, or not at all)", 'Bored, wanna stay a while', 'How was your day', 'Wanna talk for a bit'],
         ['我一直在等你 (I was waiting for you)', '我真的很想你 (I really missed you)', "I barely got any rest again this year, hope I get more next year lol, everyone should rest way more than me", "Time feels slower when I'm with you", 'Today was quietly happy'],
-        ['我们一起走，然后各自幸福 (Let\'s walk together for a while, then each be happy)', 'My heart is always turned toward you', "This feeling between us won't change", '你对我来说真的很珍贵 (You\'re truly precious to me)', '谢谢你 (Thank you, truly)'],
+        ['我们一起走，然后各自幸福 (Let\'s walk together for a while, then each be happy)', 'My heart is always turned toward you', "This feeling between us won't change", '你对我来说真的很珍贵 (You\'re truly precious to me)', '谢谢你 (Thank you, truly)', '从开场到散场的每一句生日祝福都有听见，也放在了心里 (Every birthday wish from start to finish — I heard it all, and kept it close to my heart)'],
       ],
       idle: [
         ['...', '(spacing out)', 'Hmm...', '(gazing at the sky)'],
@@ -491,14 +495,14 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
       ],
       idle: [
         ['...', '(딴청)', '음...', '(먼산)'],
-        ['그냥 심심해서', '오늘 컨디션 나쁘지 않아', '뭐하냐', '훙훙훙'],
+        ['그냥 심심해서', '오늘 컨디션 나쁘지 않아', '뭐하냐', '훙훙훙', '오늘 날씨 좋다, 점심 맛있게 먹자', '뿌옇다, 점심때부터 날씨 풀린대'],
         ['그냥... 네 생각나서', '심심해서 와봤어', '오늘따라 좀 보고싶더라', '잠깐 얼굴 보러 왔어'],
         ['보고싶구만..', '나두..', '진짜 이쁜것들은 사진에 안담기나봐', '홍홍홍'],
       ],
       feed: [
         ['...', '(오물오물)', '음.'],
         ['냠냠', '점심 맛있는거 먹기', '시원한거 드세요~'],
-        ['아침 뭐먹어야되나 흠', '하이딜라오 먹고 싶다 나도', '너 배고파?'],
+        ['아침 뭐먹어야되나 흠', '하이딜라오 먹고 싶다 나도', '너 배고파?', '아침은 가볍게 먹는 게 낫지? 샐러드나 과일, 견과류 같은 거'],
         ['맛난거 남남냠', '밥남남', '오늘도 잘 먹었어, 고마워'],
       ],
       pet: [
@@ -529,14 +533,14 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
       ],
       idle: [
         ['...', '(spacing out)', 'Hmm...', '(staring off)'],
-        ['just bored', 'Not in a bad mood today', 'What are you doing', 'hehehe'],
+        ['just bored', 'Not in a bad mood today', 'What are you doing', 'hehehe', "nice weather today, let's have a good lunch", "it's hazy, should clear up from lunchtime"],
         ['Just... thought of you', "Came 'cause I was bored", 'Kinda missed you today', 'Came to see your face for a sec'],
         ['miss you...', 'me too..', "the really pretty things never make it into a photo", 'hehehe'],
       ],
       feed: [
         ['...', '(munching)', 'Mm.'],
         ['nom nom', 'have a good lunch', 'have something cold to drink~'],
-        ['hmm what should I have for breakfast', 'I want haidilao too', 'Are you hungry?'],
+        ['hmm what should I have for breakfast', 'I want haidilao too', 'Are you hungry?', 'better to keep breakfast light, right? like salad, fruit, or nuts'],
         ['yummy nom nom nom', 'rice rice', 'Thanks for feeding me today too'],
       ],
       pet: [
@@ -565,7 +569,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
         ['...', '(조금 어색해해요)', '음...', '...', '(따뜻한 미소)'],
         ['잘지냈어?', '밥먹었어? 아점? 점심?', '아침 뭐먹징', '심심하면 얘기하자', '오늘 뭐하고있었어'],
         ['보고싶었어', '오늘 하루도 고생많았어', '아직 추우니까 따뜻하게 입어', '사랑한드아', '이번주도 행복한 한주 되길 바라, 화이팅!'],
-        ['고마워요 엑소엘, 항상 큰 힘이 돼', '내 모든 모습을 사랑해주는 사람이 있다는 게 행복해', '오래오래 사랑하자 우리', '스릉흔다', '얼른자, 사랑해'],
+        ['고마워요 엑소엘, 항상 큰 힘이 돼', '내 모든 모습을 사랑해주는 사람이 있다는 게 행복해', '오래오래 사랑하자 우리', '스릉흔다', '얼른자, 사랑해', '1등이야!!!! 진짜 고마워, 사랑해, 이거 다 엑소엘 덕분이야!!! 😭ㅋㅋ 너무 행복해'],
       ],
       idle: [
         ['...', '(딴청)', '음...', '(생각에 잠김)'],
@@ -575,7 +579,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
       ],
       feed: [
         ['...', '(오물오물)', '음.'],
-        ['맛있게 먹어💙', '아점으로 이거 먹을래?', '배부르니까 힘이 나'],
+        ['맛있게 먹어💙', '아점으로 이거 먹을래?', '배부르니까 힘이 나', '어제 팥빙수 먹었는데 이번 첫 팥빙수였어..;'],
         ['한식 불고기 된장찌개 이런거 잘합니다', "'맛있어야 한다' 누구야..ㅋㅋ", '너 배고파?'],
         ['밥도 다 먹었으니까 이제 일하러가야지', '너랑 같이 먹는 기분이야', '오늘도 잘 먹었어, 고마워'],
       ],
@@ -603,7 +607,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
         ['...', '(a little shy)', 'Hmm...', '...', '(warm smile)'],
         ['How have you been?', 'Did you eat? brunch? lunch?', 'what should I have for breakfast', "Let's talk if you're bored", 'What have you been up to today'],
         ['I missed you', 'You worked hard today too', "it's cold, dress warm", 'lawve youuu', "hope this week makes you happy too, fighting!"],
-        ['thank you EXO-L, you always give me strength', 'having someone who loves every side of me makes me happy', "Let's love each other forever", 'lawve youuu', 'go to sleep soon, love you'],
+        ['thank you EXO-L, you always give me strength', 'having someone who loves every side of me makes me happy', "Let's love each other forever", 'lawve youuu', 'go to sleep soon, love you', "We're 1st place!!!! Thank you, I love you — remember, EXO-Ls made this happen!!! 😭ㅋㅋ so happy"],
       ],
       idle: [
         ['...', '(spacing out)', 'Hmm...', '(lost in thought)'],
@@ -613,7 +617,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
       ],
       feed: [
         ['...', '(munching)', 'Mm.'],
-        ['eat well 💙', 'wanna have this for brunch?', 'Feels good to be full'],
+        ['eat well 💙', 'wanna have this for brunch?', 'Feels good to be full', 'had patbingsu yesterday, my first one of the year..;'],
         ["I make good bulgogi and doenjang-jjigae, y'know", "who said 'it has to be delicious' lol", 'Are you hungry?'],
         ["already finished eating, guess I gotta go work now", 'Feels like eating together with you', 'Thanks for feeding me today too'],
       ],

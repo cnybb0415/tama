@@ -85,8 +85,8 @@ export const BTN = {
 export const LOGICAL_W = 531
 export const LOGICAL_H = 500
 
-export const MENU_ITEMS = ['feed', 'play', 'pet', 'medicine', 'clean', 'status', 'special', 'talk']
-export const MENU_LABELS = ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Status', 'Special', 'Talk']
+export const MENU_ITEMS = ['feed', 'play', 'pet', 'medicine', 'clean', 'special', 'talk', 'status']
+export const MENU_LABELS = ['Eat', 'Play', 'Hug', 'Heal', 'Clean', 'Special', 'Talk', 'Status']
 
 // 친밀도(친밀도 0~100) 구간별 대화 단계 — 값 이상이면 해당 단계 대화가 열림
 export const AFFINITY_TIERS = [0, 15, 40, 75]
@@ -99,9 +99,9 @@ export const AFFINITY_DECAY_BASE_INTERVAL = 8 * 60 * 60
 
 // 대화 상황(카테고리)별 친밀도 단계당 대사 개수
 export const DIALOGUE_LINE_COUNTS: Record<DialogueCategory, number> = {
-  talk:  5,
-  idle:  4,
-  feed:  3,
+  talk:  6,
+  idle:  6,
+  feed:  4,
   pet:   3,
   sick:  3,
   greet: 3,

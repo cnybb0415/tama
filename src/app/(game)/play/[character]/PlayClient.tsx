@@ -19,14 +19,36 @@ interface Props {
   characterType: string
   initialSave: SaveData | null
   isAdmin: boolean
+  initialMuted: boolean
 }
 
-export default function PlayClient({ characterType, initialSave, isAdmin }: Props) {
+export default function PlayClient({ characterType, initialSave, isAdmin, initialMuted }: Props) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingSaveRef = useRef<SaveData | null>(null)
   const gameRef = useRef<GameCanvasHandle>(null)
   const [debug, setDebug] = useState(false)
+  const [muted, setMuted] = useState(initialMuted)
+  const [muteBusy, setMuteBusy] = useState(false)
   const { lang, t } = useLang()
+
+  const toggleMute = useCallback(async () => {
+    if (muteBusy) return
+    setMuteBusy(true)
+    const next = !muted
+    setMuted(next) // 낙관적 업데이트 — 실패하면 아래에서 되돌림
+    try {
+      const res = await fetch('/api/notify-prefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ character: characterType, muted: next }),
+      })
+      if (!res.ok) setMuted(!next)
+    } catch {
+      setMuted(!next)
+    } finally {
+      setMuteBusy(false)
+    }
+  }, [muted, muteBusy, characterType])
 
   const handleSave = useCallback((data: SaveData) => {
     pendingSaveRef.current = data
@@ -38,6 +60,12 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ save: data }),
       })
+        // 저장 실패가 조용히 무시되면(서버 검증 거부 등) age를 포함한 진행 상황이
+        // 하나도 안 남는데도 원인을 알 방법이 없었음 — 최소한 콘솔에는 남기게 함
+        .then(async (res) => {
+          if (!res.ok) console.error('Save rejected:', res.status, await res.text().catch(() => ''))
+        })
+        .catch((err) => console.error('Save failed:', err))
     }, 1500)
   }, [characterType])
 
@@ -95,6 +123,13 @@ export default function PlayClient({ characterType, initialSave, isAdmin }: Prop
             labelOff={t.notifyOff}
             style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: 'rgba(255,255,255,0.7)' }}
           />
+          <button
+            onClick={toggleMute}
+            disabled={muteBusy}
+            style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: muted ? '#f9d94e' : 'rgba(255,255,255,0.7)' }}
+          >
+            {muted ? `🔕 ${t.unmuteThis}` : `🔔 ${t.muteThis}`}
+          </button>
           {isAdmin && (
             <button
               onClick={() => setDebug(d => !d)}
