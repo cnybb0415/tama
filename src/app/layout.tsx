@@ -4,6 +4,15 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "EXO Tamagotchi",
   description: "Raise your EXO member",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    apple: "/picture/icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "EXO Tama",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {

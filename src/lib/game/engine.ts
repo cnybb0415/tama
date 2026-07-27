@@ -14,8 +14,8 @@ const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
 const WALK_MAX      = 10
 // 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~아침 7시
-const NIGHT_START_HOUR = 1
-const NIGHT_END_HOUR   = 7
+export const NIGHT_START_HOUR = 1
+export const NIGHT_END_HOUR   = 7
 
 export class GameEngine {
   characterType: string
@@ -533,7 +533,7 @@ function rand(min: number, max: number) {
 // [fromEpoch, toEpoch) 구간에서 심야 시간대(로컬 기준 NIGHT_START_HOUR~NIGHT_END_HOUR)를
 // 제외한 "활성 시간"(초). 하루 단위로 순회하며 그날의 심야 구간과 겹치는 만큼만 빼줌 —
 // 오프라인으로 며칠 지나 여러 밤을 거쳤어도 정확히 반영됨
-function activeSecondsBetween(fromEpoch: number, toEpoch: number): number {
+export function activeSecondsBetween(fromEpoch: number, toEpoch: number): number {
   if (toEpoch <= fromEpoch) return 0
   let total = 0
   let cursor = new Date(fromEpoch * 1000)

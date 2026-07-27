@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getWebPush, toPushSubscription, type PushSubscriptionRow } from '@/lib/push'
 import { CHARACTER_CONFIGS } from '@/lib/game/config'
+import { HUNGER_DECAY, activeSecondsBetween } from '@/lib/game/engine'
 import type { SaveData } from '@/lib/game/types'
 
 export const maxDuration = 60
 
-const HUNGER_DECAY = 4 * 60 * 60
 // 알림 재발송 간격 — 이 시간 안에 이미 알렸으면 또 보내지 않음
 const NOTIFY_COOLDOWN = 3 * 60 * 60
 // 이만큼 접속(저장) 안 하면 "오랜만이네" 알림 대상
@@ -16,13 +16,19 @@ const INACTIVE_THRESHOLD = 8 * 60 * 60
 const QUERY_CHUNK = 200
 const SEND_CONCURRENCY = 20
 
-// 알림은 배고픔/아픔/장시간 미접속, 이 세 가지 경우에만 보냄 (행복도는 제외)
+// 알림은 배고픔/아픔/장시간 미접속, 이 세 가지 경우에만 보냄 (행복도는 제외).
+// 배고픔 추정치는 engine.ts와 동일하게 심야 시간대(활성 시간 기준)를 제외하고 계산해야
+// 함 — 안 그러면 밤 시간을 그냥 다 감소로 쳐서, 실제로는 아직 안 배고픈데도
+// "배고파요" 알림이 잘못 나가는 문제가 있었음
 function needsAttention(save: SaveData, updatedAt: string): string | null {
   const { stats } = save
   if (!stats.alive) return null
 
   const now = Date.now() / 1000
-  const hunger = Math.max(0, stats.hunger - Math.floor((now - save.last_hunger_decay) / HUNGER_DECAY))
+  const accum = save.hunger_decay_accum ?? 0
+  const totalActive = accum + activeSecondsBetween(save.last_hunger_decay, now)
+  const ticks = Math.floor(totalActive / HUNGER_DECAY)
+  const hunger = Math.max(0, stats.hunger - ticks)
 
   if (stats.sick) return 'sick'
   if (hunger === 0) return 'hunger'
