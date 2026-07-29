@@ -18,8 +18,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // 홈 화면에 추가(standalone)한 iOS 앱에서 viewport-fit이 없으면 노치 영역을
+  // 피해 안전한 사각형 안에만 렌더링하려다가 화면 전체가 작게 줄어드는 문제가 있었음
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({

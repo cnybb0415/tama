@@ -13,9 +13,9 @@ const POOP_MIN      = 15 * 60
 const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
 const WALK_MAX      = 10
-// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~아침 7시
+// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~아침 8시
 export const NIGHT_START_HOUR = 1
-export const NIGHT_END_HOUR   = 7
+export const NIGHT_END_HOUR   = 8
 
 export class GameEngine {
   characterType: string
