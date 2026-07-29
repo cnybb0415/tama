@@ -8,7 +8,7 @@
 - `age`는 캐릭터가 **생성된 시각(`created_at`)부터 실제로 경과한 시간**으로 계산됩니다.
   `age = floor((지금 시각 - created_at) / 86400초)`
   → 하루에 한 번씩 접속하지 않아도, 며칠 만에 들어와도 정확히 반영됩니다.
-- `evolutionDay`(현재 모든 캐릭터 5일, [config.ts](src/lib/game/config.ts))보다 `age`가 크거나 같아지는 순간 `stage`가 0(Kid) → 1(Adult)로 바뀌고, 화면에 진화 플래시가 뜹니다.
+- `evolutionDay`(현재 모든 캐릭터 3일 — 테스트용으로 단축, [config.ts](src/lib/game/config.ts))보다 `age`가 크거나 같아지는 순간 `stage`가 0(Kid) → 1(Adult)로 바뀌고, 화면에 진화 플래시가 뜹니다.
 - age/stage가 바뀐 그 즉시 서버에 저장됩니다. (예전엔 이 시점에 저장을 안 해서, 진화한 뒤 아무 행동도 안 하고 탭을 닫으면 다음 접속 때 진화가 되돌아가는 버그가 있었음 — 수정됨)
 - 디버그 모드에서 STAGE 버튼(Kid/Adult)을 누르면 `age`와 `created_at`을 그 즉시 강제로 맞춰서 스테이지를 미리 볼 수 있습니다.
 
