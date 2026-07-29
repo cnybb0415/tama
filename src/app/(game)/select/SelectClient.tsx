@@ -103,7 +103,7 @@ export default function SelectClient({ username }: Props) {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', width: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', width: '100%' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 유저명 + 언어 토글 — 타마고치 위 */}

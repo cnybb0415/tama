@@ -1,6 +1,6 @@
 export default function GameLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', position: 'relative' }}>
+    <div style={{ minHeight: '100dvh', position: 'relative' }}>
       <div style={{
         position: 'fixed',
         inset: 0,
@@ -16,7 +16,7 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        minHeight: '100vh',
+        minHeight: '100dvh',
       }}>
         {children}
       </div>

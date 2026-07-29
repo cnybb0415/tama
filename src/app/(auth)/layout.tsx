@@ -1,6 +1,6 @@
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', position: 'relative' }}>
+    <div style={{ minHeight: '100dvh', position: 'relative' }}>
       {/* 다마고치 회색 배경을 페이지 전체로 확장 */}
       <div style={{
         position: 'fixed',
@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh',
+        minHeight: '100dvh',
         padding: '24px 0',
       }}>
         {children}
