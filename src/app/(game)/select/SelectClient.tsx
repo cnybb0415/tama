@@ -6,15 +6,24 @@ import { createBrowserClient } from '@/lib/supabase/client'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
+import { CHARACTER_CONFIGS } from '@/lib/game/config'
 
 const CHARACTERS = [
-  { id: 'suho',     name: 'SUHO',     idleImg: '/picture/exo/suho/kid/suho_kid_idle_01.png',         available: true },
-  { id: 'ray',      name: 'LAY',      idleImg: '/picture/exo/ray/kid/ray_kid_idle_01.png',           available: true },
-  { id: 'chanyeol', name: 'CHANYEOL', idleImg: '/picture/exo/chanyeol/kid/chanyeol_kid_idle_01.png', available: true },
-  { id: 'do',       name: 'D.O.',     idleImg: '/picture/exo/do/kid/do_kid_idle_01.png',             available: true },
-  { id: 'kai',      name: 'KAI',      idleImg: '/picture/exo/kai/kid/kai_kid_idle_01.png',           available: true },
-  { id: 'sehun',    name: 'SEHUN',    idleImg: '/picture/exo/sehun/kid/sehun_kid_idle_01.png',       available: true },
+  { id: 'suho',     name: 'SUHO',     available: true },
+  { id: 'ray',      name: 'LAY',      available: true },
+  { id: 'chanyeol', name: 'CHANYEOL', available: true },
+  { id: 'do',       name: 'D.O.',     available: true },
+  { id: 'kai',      name: 'KAI',      available: true },
+  { id: 'sehun',    name: 'SEHUN',    available: true },
 ]
+
+// 실제 진화 상태(stage)에 맞는 썸네일 경로 — engine.ts의 이미지 로딩과 동일한 규칙
+function idleImgFor(characterId: string, stage: number): string {
+  const cfg = CHARACTER_CONFIGS[characterId]
+  const stageCfg = cfg.stages[stage] ?? cfg.stages[0]
+  const fileAnim = stageCfg.fileMap.idle ?? 'idle'
+  return `${stageCfg.folder}/${stageCfg.prefix}${fileAnim}_01.png`
+}
 
 const SCREEN = { left: 34.8, top: 37.0, width: 27.1, height: 29.4 }
 const BTNS = {
@@ -27,9 +36,9 @@ type BtnSide = keyof typeof BTNS
 
 const LAST_CHARACTER_KEY = 'exo_last_character'
 
-interface Props { username: string }
+interface Props { username: string; stageByCharacter: Record<string, number> }
 
-export default function SelectClient({ username }: Props) {
+export default function SelectClient({ username, stageByCharacter }: Props) {
   const router = useRouter()
   const { lang, t } = useLang()
   const [idx, setIdx]       = useState(0)
@@ -136,7 +145,7 @@ export default function SelectClient({ username }: Props) {
 
         {/* 캐릭터 이미지 */}
         <img
-          src={current.idleImg}
+          src={idleImgFor(current.id, stageByCharacter[current.id] ?? 0)}
           alt={current.name}
           style={{
             position: 'absolute',
