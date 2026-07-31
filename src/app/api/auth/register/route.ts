@@ -9,7 +9,9 @@ import { rateLimit, clientIp } from '@/lib/rateLimit'
 // 성공/실패 이유와 무관하게 항상 같은 에러만 반환한다.
 export async function POST(req: NextRequest) {
   const ip = clientIp(req)
-  if (!rateLimit(`register:${ip}`, 8, 10 * 60 * 1000))
+  // IP 기준 제한은 x-forwarded-for 위조로 우회될 수 있어서, IP와 무관한
+  // 전역 상한도 같이 걸어 대량 가입 봇을 이중으로 막음
+  if (!rateLimit(`register:${ip}`, 8, 10 * 60 * 1000) || !rateLimit('register:global', 100, 10 * 60 * 1000))
     return NextResponse.json({ error: 'Too many attempts. Try again later.' }, { status: 429 })
 
   let body: { username?: string; password?: string }

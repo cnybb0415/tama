@@ -13,6 +13,12 @@ export const metadata: Metadata = {
     title: "EXO Tama",
     statusBarStyle: "black-translucent",
   },
+  // robots.txt를 무시하는 봇도 있어서, 페이지 레벨에서도 한 번 더 색인/크롤링 금지 신호를 줌
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
 };
 
 export const viewport: Viewport = {

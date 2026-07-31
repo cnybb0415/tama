@@ -28,7 +28,13 @@ function isPlausibleTimestamp(v: unknown, now: number): v is number {
 // 클라이언트가 보낸 세이브 데이터를 검증 — 저장 API가 스탯을 그대로 믿고 저장하면
 // curl로 배고픔/친밀도/체중/생존여부 등을 마음대로 조작(치트)할 수 있었던 것을 막기 위함.
 // 통과 못 하면 null을 반환하고, 호출 쪽에서 저장을 거부한다.
-export function validateSaveData(input: unknown): SaveData | null {
+//
+// existingCreatedAt: 이 캐릭터의 기존 세이브가 있다면 그 created_at(서버가 이미 확정한 값).
+// 없으면(첫 저장) undefined — 이번에 클라이언트가 보낸 값을 그대로 최초 확정값으로 씀.
+// created_at을 이렇게 고정해도, age 필드 자체를 그거랑 무관하게 직접 조작해서 보내면
+// 여전히 진화/체중 상한을 우회할 수 있으므로, age가 "실제 경과 시간으로 가능한 최대치"를
+// 넘지 않는지도 같이 검증한다.
+export function validateSaveData(input: unknown, existingCreatedAt?: number | null): SaveData | null {
   if (!input || typeof input !== 'object') return null
   const d = input as Record<string, unknown>
   const now = Date.now() / 1000
@@ -61,6 +67,18 @@ export function validateSaveData(input: unknown): SaveData | null {
   if (d.last_affinity_decay_happiness !== null && !isPlausibleTimestamp(d.last_affinity_decay_happiness, now)) return null
 
   if (d.created_at !== null && !isPlausibleTimestamp(d.created_at, now)) return null
+
+  // created_at 확정: 기존 값이 있으면 그걸로 강제 고정(클라이언트가 보낸 값 무시),
+  // 없으면(최초 저장) 이번에 보낸 값을 그대로 확정값으로 채택
+  const createdAt = existingCreatedAt !== undefined ? existingCreatedAt : (d.created_at as number | null)
+  d.created_at = createdAt
+
+  // age는 확정된 created_at 기준으로 실제 경과 가능한 최대치를 넘을 수 없음 —
+  // 안 그러면 created_at을 고정해도 age만 직접 조작해서 진화를 앞당길 수 있었음
+  if (createdAt != null) {
+    const maxPlausibleAge = Math.floor((now - createdAt) / 86400)
+    if ((s.age as number) > maxPlausibleAge) return null
+  }
 
   const poopTimers = d.poop_timers
   if (poopTimers !== undefined) {
