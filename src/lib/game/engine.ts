@@ -13,9 +13,9 @@ const POOP_MIN      = 15 * 60
 const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
 const WALK_MAX      = 10
-// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~아침 8시
+// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~오전 9시
 export const NIGHT_START_HOUR = 1
-export const NIGHT_END_HOUR   = 8
+export const NIGHT_END_HOUR   = 9
 
 export class GameEngine {
   characterType: string
@@ -282,7 +282,7 @@ export class GameEngine {
   }
 
   // 배고픔/행복 감소를 "심야 시간대를 제외한 활성 시간" 기준으로 계산 — 자는 동안(로컬
-  // 새벽 1시~7시)은 시계가 멈춘 것처럼 취급됨. lastSync는 매 호출마다 now로 갱신하고,
+  // 새벽 1시~오전 9시)은 시계가 멈춘 것처럼 취급됨. lastSync는 매 호출마다 now로 갱신하고,
   // 아직 한 tick(interval)에 못 미치는 자투리 활성 시간은 accum에 그대로 이월해서 다음
   // 호출에 합산 — 그래서 "언제 tick이 발생했는지"를 시각으로 되짚을 필요가 없어짐.
   // 처음 0을 찍는 순간에는, 정확히 몇 번째 tick에서 0이 됐는지를 활성 시간 기준으로
@@ -510,6 +510,10 @@ export class GameEngine {
   }
 
   private _restart(): void {
+    // 죽기 전에 성인이었으면 스프라이트를 다시 키드로 로드해야 함 — state.stage만
+    // 0으로 되돌리고 onEvolve를 안 불러서, 나이/스테이지는 정확히 리셋됐는데도 화면엔
+    // 계속 성인 그림이 남아있는 버그가 있었음
+    const wasAdult = this.state.stage !== 0
     this.debugAnimActive = false
     this.stats = { hunger: 4, happiness: 4, affinity: 0, age: 0, weight: BASE_WEIGHT, sick: false, poop_count: 0, alive: true }
     const now = Date.now() / 1000
@@ -537,6 +541,7 @@ export class GameEngine {
     this.idleChatInterval = rand(IDLE_CHAT_MIN, IDLE_CHAT_MAX)
     this.greeted = false
     this.anim.set('idle')
+    if (wasAdult) this.onEvolve?.(0)
     this.onSave?.(this.getSaveData())
   }
 }

@@ -34,7 +34,10 @@ function isPlausibleTimestamp(v: unknown, now: number): v is number {
 // created_at을 이렇게 고정해도, age 필드 자체를 그거랑 무관하게 직접 조작해서 보내면
 // 여전히 진화/체중 상한을 우회할 수 있으므로, age가 "실제 경과 시간으로 가능한 최대치"를
 // 넘지 않는지도 같이 검증한다.
-export function validateSaveData(input: unknown, existingCreatedAt?: number | null): SaveData | null {
+//
+// skipAgeLock: 관리자 계정의 디버그 STAGE 버튼처럼, 의도적으로 나이를 앞당겨 미리보기
+// 하는 기능까지 이 검증에 막히면 안 되므로, 신뢰된 admin 요청에 한해 이 잠금을 건너뜀
+export function validateSaveData(input: unknown, existingCreatedAt?: number | null, skipAgeLock = false): SaveData | null {
   if (!input || typeof input !== 'object') return null
   const d = input as Record<string, unknown>
   const now = Date.now() / 1000
@@ -68,16 +71,27 @@ export function validateSaveData(input: unknown, existingCreatedAt?: number | nu
 
   if (d.created_at !== null && !isPlausibleTimestamp(d.created_at, now)) return null
 
-  // created_at 확정: 기존 값이 있으면 그걸로 강제 고정(클라이언트가 보낸 값 무시),
-  // 없으면(최초 저장) 이번에 보낸 값을 그대로 확정값으로 채택
-  const createdAt = existingCreatedAt !== undefined ? existingCreatedAt : (d.created_at as number | null)
-  d.created_at = createdAt
+  if (skipAgeLock) {
+    // admin 디버그 도구는 나이/생성시각을 의도적으로 조작해 미리보기 하므로 그대로 신뢰
+    d.created_at = (d.created_at as number | null) ?? existingCreatedAt ?? null
+  } else {
+    // created_at 확정: age가 0으로 리셋되는 경우(최초 생성 또는 재시작)엔 클라이언트가
+    // 보낸 값(=지금 시각)을 그대로 신뢰함 — age=0은 어차피 최솟값이라 조작해도 득이 없음.
+    // age가 0보다 큰데 기존 세이브가 있으면 그 created_at으로 강제 고정(클라이언트 값 무시) —
+    // 안 그러면 created_at을 조작해서 나이를 부풀릴 수 있음.
+    // (예전엔 age=0이어도 무조건 기존 값으로 고정해버려서, 재시작해도 created_at이 안 바뀌고
+    //  다음 로드 때 나이가 다시 예전 값으로 튀어오르는 버그가 있었음)
+    const createdAt = (s.age === 0 || existingCreatedAt === undefined)
+      ? (d.created_at as number | null)
+      : existingCreatedAt
+    d.created_at = createdAt
 
-  // age는 확정된 created_at 기준으로 실제 경과 가능한 최대치를 넘을 수 없음 —
-  // 안 그러면 created_at을 고정해도 age만 직접 조작해서 진화를 앞당길 수 있었음
-  if (createdAt != null) {
-    const maxPlausibleAge = Math.floor((now - createdAt) / 86400)
-    if ((s.age as number) > maxPlausibleAge) return null
+    // age는 확정된 created_at 기준으로 실제 경과 가능한 최대치를 넘을 수 없음 —
+    // 안 그러면 created_at을 고정해도 age만 직접 조작해서 진화를 앞당길 수 있었음
+    if (createdAt != null) {
+      const maxPlausibleAge = Math.floor((now - createdAt) / 86400)
+      if ((s.age as number) > maxPlausibleAge) return null
+    }
   }
 
   const poopTimers = d.poop_timers
