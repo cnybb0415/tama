@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic'
 import type { SaveData, AnimName } from '@/lib/game/types'
 import { AFFINITY_TIERS } from '@/lib/game/config'
 import type { GameCanvasHandle } from '@/components/game/GameCanvas'
-import NotifyToggle from '@/components/game/NotifyToggle'
+import NotificationControl from '@/components/game/NotificationControl'
+import BgmToggleButton from '@/components/BgmToggleButton'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
@@ -27,28 +28,7 @@ export default function PlayClient({ characterType, initialSave, isAdmin, initia
   const pendingSaveRef = useRef<SaveData | null>(null)
   const gameRef = useRef<GameCanvasHandle>(null)
   const [debug, setDebug] = useState(false)
-  const [muted, setMuted] = useState(initialMuted)
-  const [muteBusy, setMuteBusy] = useState(false)
   const { lang, t } = useLang()
-
-  const toggleMute = useCallback(async () => {
-    if (muteBusy) return
-    setMuteBusy(true)
-    const next = !muted
-    setMuted(next) // 낙관적 업데이트 — 실패하면 아래에서 되돌림
-    try {
-      const res = await fetch('/api/notify-prefs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ character: characterType, muted: next }),
-      })
-      if (!res.ok) setMuted(!next)
-    } catch {
-      setMuted(!next)
-    } finally {
-      setMuteBusy(false)
-    }
-  }, [muted, muteBusy, characterType])
 
   const handleSave = useCallback((data: SaveData) => {
     pendingSaveRef.current = data
@@ -118,18 +98,17 @@ export default function PlayClient({ characterType, initialSave, isAdmin, initia
               }}>{l.toUpperCase()}</button>
             ))}
           </span>
-          <NotifyToggle
+          <NotificationControl
+            characterId={characterType}
+            initialMuted={initialMuted}
             labelOn={t.notifyOn}
             labelOff={t.notifyOff}
+            labelMuted={t.notifyMuted}
             style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: 'rgba(255,255,255,0.7)' }}
           />
-          <button
-            onClick={toggleMute}
-            disabled={muteBusy}
-            style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: muted ? '#f9d94e' : 'rgba(255,255,255,0.7)' }}
-          >
-            {muted ? `🔕 ${t.unmuteThis}` : `🔔 ${t.muteThis}`}
-          </button>
+          <BgmToggleButton
+            style={{ ...btn, fontSize: 9, padding: '1px 5px', background: 'rgba(0,0,0,0.45)', border: 'none', color: 'rgba(255,255,255,0.7)' }}
+          />
           {isAdmin && (
             <button
               onClick={() => setDebug(d => !d)}

@@ -79,10 +79,9 @@ export const T = {
     pwNoRecover: '⚠ Forgotten passwords cannot be recovered',
     privacyLine1: 'Collected: username, password · Purpose: service use',
     privacyLine2: 'Retention: deleted on withdrawal',
-    notifyOn:    'Alerts on',
-    notifyOff:   'Get alerts',
-    muteThis:    'Mute this one',
-    unmuteThis:  'Unmute',
+    notifyOn:    'Get alerts',
+    notifyOff:   'Turn off all alerts',
+    notifyMuted: 'Mute this member',
   },
   ko: {
     menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '스페셜', '대화', '상태'],
@@ -164,10 +163,9 @@ export const T = {
     pwNoRecover: '⚠ 비밀번호는 복구 불가',
     privacyLine1: '수집: 아이디, 비밀번호 · 목적: 서비스 이용',
     privacyLine2: '보관: 회원 탈퇴 시 삭제',
-    notifyOn:    '알림 켜짐',
-    notifyOff:   '알림 받기',
-    muteThis:    '이 멤버 뮤트',
-    unmuteThis:  '뮤트 해제',
+    notifyOn:    '알림 받기',
+    notifyOff:   '전체 알림 받지 않기',
+    notifyMuted: '이 멤버 뮤트',
   },
 } as const
 
@@ -495,7 +493,7 @@ export const CHARACTER_DIALOGUE: Partial<Record<string, { ko: Record<string, str
       ],
       idle: [
         ['...', '(딴청)', '음...', '(먼산)'],
-        ['그냥 심심해서', '오늘 컨디션 나쁘지 않아', '뭐하냐', '훙훙훙', '오늘 날씨 좋다, 점심 맛있게 먹자', '뿌옇다, 점심때부터 날씨 풀린대'],
+        ['그냥 심심해서', '오늘 컨디션 나쁘지 않아', '뭐하냐', '홍홍홍', '오늘 날씨 좋다, 점심 맛있게 먹자', '뿌옇다, 점심때부터 날씨 풀린대'],
         ['그냥... 네 생각나서', '심심해서 와봤어', '오늘따라 좀 보고싶더라', '잠깐 얼굴 보러 왔어'],
         ['보고싶구만..', '나두..', '진짜 이쁜것들은 사진에 안담기나봐', '홍홍홍'],
       ],
