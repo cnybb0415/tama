@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'EXO Tamagotchi',
-    short_name: 'EXO Tama',
+    name: 'Back Pocket',
+    short_name: 'Back Pocket',
     description: 'Raise your EXO member',
     start_url: '/select',
     display: 'standalone',

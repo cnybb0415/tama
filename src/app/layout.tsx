@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EXO Tamagotchi",
+  title: "Back Pocket",
   description: "Raise your EXO member",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "EXO Tama",
+    title: "Back Pocket",
     statusBarStyle: "black-translucent",
   },
   // robots.txt를 무시하는 봇도 있어서, 페이지 레벨에서도 한 번 더 색인/크롤링 금지 신호를 줌
