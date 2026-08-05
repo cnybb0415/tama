@@ -67,7 +67,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   // admin 계정의 디버그 STAGE 버튼은 나이를 의도적으로 앞당겨 진화를 미리보기 하므로,
   // 그 계정만 나이 잠금 검증에서 예외로 둠 (다른 검증은 admin도 동일하게 적용)
-  const isAdmin = (user.user_metadata?.username as string | undefined) === 'admin'
+  // user_metadata.username은 유저 본인이 Supabase Auth API로 직접 바꿔 admin을 사칭하고
+  // 이 예외를 얻어갈 수 있어서 못 씀 — profiles.username(가입 트리거로만 채워짐)으로 확인
+  const { data: profile } = await admin.from('profiles').select('username').eq('id', user.id).single()
+  const isAdmin = profile?.username === 'admin'
 
   // 스탯 값이 게임 로직상 나올 수 있는 범위인지 검증 — 안 그러면 로그인한 본인 계정으로
   // curl을 직접 쳐서 배고픔/친밀도/나이/체중/생존여부 등을 마음대로 조작할 수 있었음

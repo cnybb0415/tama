@@ -32,10 +32,22 @@ create table if not exists push_subscriptions (
   created_at timestamptz default now()
 );
 
+-- 오류 제보 / 문의사항 — 작성자 본인과 관리자(서버의 service role)만 확인 가능,
+-- 다른 유저에게는 공개되지 않는 비공개 문의
+create table if not exists feedback (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  username text not null,
+  message text not null,
+  resolved boolean not null default false,
+  created_at timestamptz default now()
+);
+
 -- RLS 활성화
 alter table profiles enable row level security;
 alter table game_saves enable row level security;
 alter table push_subscriptions enable row level security;
+alter table feedback enable row level security;
 
 -- 기존 정책 제거
 drop policy if exists "own profile" on profiles;
@@ -43,6 +55,7 @@ drop policy if exists "own saves" on game_saves;
 drop policy if exists "profiles_select_own" on profiles;
 drop policy if exists "saves_select_own" on game_saves;
 drop policy if exists "push_select_own" on push_subscriptions;
+drop policy if exists "feedback_select_own" on feedback;
 
 -- profiles: 자기 자신만 조회 가능, 쓰기 불가 (트리거가 처리)
 create policy "profiles_select_own" on profiles
@@ -56,6 +69,10 @@ create policy "saves_select_own" on game_saves
 
 -- push_subscriptions: 조회는 자기 것만, 쓰기는 서버(service role)만 가능
 create policy "push_select_own" on push_subscriptions
+  for select using (auth.uid() = user_id);
+
+-- feedback: 조회는 자기 것만 (관리자는 서버 API에서 service role로 전체 조회), 쓰기는 서버(service role)만 가능
+create policy "feedback_select_own" on feedback
   for select using (auth.uid() = user_id);
 
 -- 회원가입 시 자동 profiles 생성

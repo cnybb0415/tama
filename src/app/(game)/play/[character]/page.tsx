@@ -24,14 +24,15 @@ export default async function PlayPage({ params }: Props) {
       .single(),
     supabase
       .from('profiles')
-      .select('muted_characters')
+      .select('muted_characters, username')
       .eq('id', user.id)
       .single(),
   ])
 
   const save = (data?.save_data as SaveData) ?? null
-  const username = (user.user_metadata?.username as string) ?? ''
+  // user_metadata.username은 유저가 Supabase Auth API로 직접 바꿔 admin을 사칭할 수 있어서
+  // admin 판별엔 profiles.username을 씀 (가입 트리거로만 채워지고 유저는 못 고침)
   const muted = ((profile?.muted_characters as string[]) ?? []).includes(character)
 
-  return <PlayClient characterType={character} initialSave={save} isAdmin={username === 'admin'} initialMuted={muted} />
+  return <PlayClient characterType={character} initialSave={save} isAdmin={profile?.username === 'admin'} initialMuted={muted} />
 }
