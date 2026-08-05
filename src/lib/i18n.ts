@@ -82,6 +82,7 @@ export const T = {
     notifyOn:    'Get alerts',
     notifyOff:   'Turn off all alerts',
     notifyMuted: 'Mute this member',
+    eventEndedBody: 'Thank you for spending time with us. The service is no longer available.',
   },
   ko: {
     menu:        ['먹기', '놀기', '안아주기', '치료', '청소', '스페셜', '대화', '상태'],
@@ -166,6 +167,7 @@ export const T = {
     notifyOn:    '알림 받기',
     notifyOff:   '전체 알림 받지 않기',
     notifyMuted: '이 멤버 뮤트',
+    eventEndedBody: '함께해주셔서 감사합니다. 지금은 서비스를 이용하실 수 없습니다.',
   },
 } as const
 

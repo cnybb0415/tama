@@ -1,7 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { EVENT_END } from '@/lib/eventConfig'
 
 export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname
+
+  if (Date.now() >= EVENT_END.getTime() && path !== '/event-ended') {
+    return NextResponse.redirect(new URL('/event-ended', request.url))
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -20,7 +27,6 @@ export async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const path = request.nextUrl.pathname
 
   const isAuthPage = path.startsWith('/login') || path.startsWith('/register')
   const isGamePage = path.startsWith('/select') || path.startsWith('/play')
