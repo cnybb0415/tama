@@ -115,7 +115,7 @@ export default function SelectClient({ username, stageByCharacter, isAdmin }: Pr
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', width: '100%' }}>
-      <div style={{ position: 'relative', width: '100%', maxWidth: 444, transform: 'translateY(-21px)' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 유저명 + 언어 토글 — 타마고치 위 */}
         <div style={{ position: 'absolute', top: '2%', left: 0, right: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
