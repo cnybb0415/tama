@@ -80,7 +80,7 @@ export default function PlayClient({ characterType, initialSave, isAdmin, initia
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', width: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', width: '100%', overflow: 'hidden' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 상단 — 캔버스에 overlaid */}
@@ -138,6 +138,8 @@ export default function PlayClient({ characterType, initialSave, isAdmin, initia
             position: 'absolute',
             right: 4,
             top: '10%',
+            maxHeight: '85dvh',
+            overflowY: 'auto',
             zIndex: 10,
             display: 'flex',
             flexDirection: 'column',

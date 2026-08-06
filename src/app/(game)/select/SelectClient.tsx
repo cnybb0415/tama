@@ -114,7 +114,7 @@ export default function SelectClient({ username, stageByCharacter, isAdmin }: Pr
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', width: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', width: '100%', overflow: 'hidden' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 444 }}>
 
         {/* 유저명 + 언어 토글 — 타마고치 위 */}
