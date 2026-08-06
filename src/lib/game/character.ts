@@ -1,4 +1,4 @@
-import { ANIM_CONFIG, ACTION_ANIMS, CHARACTER_CONFIGS, AFFINITY_TIERS } from './config'
+import { ANIM_CONFIG, ACTION_ANIMS, CHARACTER_CONFIGS, AFFINITY_TIERS, BASE_WEIGHT, WEIGHT_PER_DAY } from './config'
 import type { AnimName } from './types'
 
 export class CharacterImages {
@@ -112,6 +112,16 @@ export function stageForAge(age: number, characterType: string): number {
   const ev = CHARACTER_CONFIGS[characterType].evolutionDay
   if (ev === null || age < ev) return 0
   return 1
+}
+
+// 나이 기준 그날의 체중 상한(하루 WEIGHT_PER_DAY씩 증가) — 단, 성인(stage 1)이 되면
+// 캐릭터별 실제 체격에 맞춘 adultMaxWeight를 절대 못 넘도록 추가로 막음. 하루치 상한이
+// 그 값을 넘어서기 전까지는 기존처럼 계속 늘어나다가, 넘는 시점부터 그 캐릭터의
+// adultMaxWeight에서 멈춤
+export function maxWeightFor(characterType: string, age: number, stage: number): number {
+  const dailyCap = BASE_WEIGHT + age * WEIGHT_PER_DAY
+  if (stage === 0) return dailyCap
+  return Math.min(dailyCap, CHARACTER_CONFIGS[characterType].adultMaxWeight)
 }
 
 // 친밀도(0~100) 값이 속하는 대화 단계 인덱스 (AFFINITY_TIERS 기준)

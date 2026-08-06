@@ -1,5 +1,5 @@
-import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE, BASE_WEIGHT, WEIGHT_PER_DAY, AFFINITY_DECAY_THRESHOLD, AFFINITY_DECAY_BASE_INTERVAL } from './config'
-import { CharacterAnim, CharacterImages, stageForAge, affinityTier } from './character'
+import { MENU_ITEMS, CHARACTER_CONFIGS, DEFAULT_EVOLUTION_DAY, DIALOGUE_LINE_COUNTS, IDLE_CHAT_MIN, IDLE_CHAT_MAX, REACTION_CHANCE, BASE_WEIGHT, MAX_POOP_COUNT, AFFINITY_DECAY_THRESHOLD, AFFINITY_DECAY_BASE_INTERVAL } from './config'
+import { CharacterAnim, CharacterImages, stageForAge, affinityTier, maxWeightFor } from './character'
 import type { AnimName, DialogueCategory, GameStats, GameState, SaveData } from './types'
 
 // 배고픔/행복은 이제 실제 경과 시간 기준으로 앱을 며칠 안 켜도 정확히 따라잡힘
@@ -13,9 +13,15 @@ const POOP_MIN      = 15 * 60
 const POOP_MAX      = 30 * 60
 const WALK_MIN      = 5
 const WALK_MAX      = 10
-// 심야 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) 새벽 1시~오전 9시
+// 심야(수면) 시간대(각자 기기의 로컬 시간 기준 — 나라별로 자동으로 맞음) — 아이일 땐
+// 새벽 1시~오전 9시, 성인이 되면 활동 시간이 늘어난다는 설정으로 1시~오전 8시로 줄어듦
 export const NIGHT_START_HOUR = 1
-export const NIGHT_END_HOUR   = 9
+export const NIGHT_END_HOUR_KID   = 9
+export const NIGHT_END_HOUR_ADULT = 8
+
+export function nightEndHourForStage(stage: number): number {
+  return stage === 0 ? NIGHT_END_HOUR_KID : NIGHT_END_HOUR_ADULT
+}
 
 export class GameEngine {
   characterType: string
@@ -164,13 +170,14 @@ export class GameEngine {
     // Stat decay — 실제 경과 시간만큼 한번에 따라잡음 (앱을 오래 안 켜도 정확히 반영).
     // 이번에 처음 0을 찍었으면 "언제부터 0이었는지"도 역산해서 사망 유예시간이
     // 오프라인이었던 동안에도 정상적으로 흘러가게 함
-    const hungerTick = this._tickDecay(this.stats.hunger, this.lastHungerDecay, this.hungerDecayAccum, HUNGER_DECAY, now, this.hungerZeroSince)
+    const nightEndHour = nightEndHourForStage(this.state.stage)
+    const hungerTick = this._tickDecay(this.stats.hunger, this.lastHungerDecay, this.hungerDecayAccum, HUNGER_DECAY, now, this.hungerZeroSince, nightEndHour)
     this.stats.hunger = hungerTick.value
     this.lastHungerDecay = hungerTick.lastSync
     this.hungerDecayAccum = hungerTick.accum
     this.hungerZeroSince = hungerTick.zeroSince
 
-    const hapTick = this._tickDecay(this.stats.happiness, this.lastHapDecay, this.hapDecayAccum, HAP_DECAY, now, this.hapZeroSince)
+    const hapTick = this._tickDecay(this.stats.happiness, this.lastHapDecay, this.hapDecayAccum, HAP_DECAY, now, this.hapZeroSince, nightEndHour)
     this.stats.happiness = hapTick.value
     this.lastHapDecay = hapTick.lastSync
     this.hapDecayAccum = hapTick.accum
@@ -192,7 +199,7 @@ export class GameEngine {
       const remaining: number[] = []
       for (const t of this.poopTimers) {
         if (now >= t) {
-          this.stats.poop_count++
+          this.stats.poop_count = Math.min(MAX_POOP_COUNT, this.stats.poop_count + 1)
           if (this.stats.poop_count >= 2 && !this.stats.sick) {
             this.stats.sick = true
             this.sickSince = now
@@ -288,16 +295,16 @@ export class GameEngine {
   // 처음 0을 찍는 순간에는, 정확히 몇 번째 tick에서 0이 됐는지를 활성 시간 기준으로
   // 역산(advanceByActiveSeconds)해서 사망 유예시간이 오프라인 중에도 정상적으로 흘러가게 함.
   private _tickDecay(
-    value: number, lastSync: number, accum: number, interval: number, now: number, zeroSince: number | null
+    value: number, lastSync: number, accum: number, interval: number, now: number, zeroSince: number | null, nightEndHour: number
   ): { value: number; lastSync: number; accum: number; zeroSince: number | null } {
-    const totalActive = accum + activeSecondsBetween(lastSync, now)
+    const totalActive = accum + activeSecondsBetween(lastSync, now, nightEndHour)
     const ticks = Math.floor(totalActive / interval)
     const newAccum = totalActive - ticks * interval
     if (ticks <= 0) return { value, lastSync: now, accum: newAccum, zeroSince }
 
     if (value > 0 && value - ticks <= 0) {
       const neededActive = value * interval - accum
-      const zeroCrossedAt = advanceByActiveSeconds(lastSync, neededActive)
+      const zeroCrossedAt = advanceByActiveSeconds(lastSync, neededActive, nightEndHour)
       return { value: 0, lastSync: now, accum: newAccum, zeroSince: zeroCrossedAt }
     }
     const newValue = Math.max(0, value - ticks)
@@ -319,10 +326,10 @@ export class GameEngine {
     return { affinity: Math.max(0, this.stats.affinity - ticks), lastDecay: lastDecay + ticks * interval }
   }
 
-  // 각자 기기의 로컬 시간 기준 심야(수면) 시간대 여부
+  // 각자 기기의 로컬 시간 기준 심야(수면) 시간대 여부 — 성인이면 취침 종료 시각이 앞당겨짐
   private _isNight(now: number): boolean {
     const hour = new Date(now * 1000).getHours()
-    return hour >= NIGHT_START_HOUR && hour < NIGHT_END_HOUR
+    return hour >= NIGHT_START_HOUR && hour < nightEndHourForStage(this.state.stage)
   }
 
   // ── Input ──────────────────────────────────────────────────────────────
@@ -373,7 +380,7 @@ export class GameEngine {
       // 안 그러면 채워도 예전 감소 타이머가 그대로 흘러서 방금 채운 직후에 또 깎이는 버그가 있었음
       this.lastHungerDecay = Date.now() / 1000
       this.hungerDecayAccum = 0
-      const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
+      const maxWeight = maxWeightFor(this.characterType, this.stats.age, this.state.stage)
       this.stats.weight = Math.min(maxWeight, this.stats.weight + 1)
       this._bumpAffinity(1)
       this._schedulePoop()
@@ -490,7 +497,7 @@ export class GameEngine {
     // 서버 저장 검증(validateSaveData)이 나이 기준 최대치를 강제하므로, 여기서도
     // 그 상한을 넘지 않게 해야 함 — 안 그러면 이후 모든 저장이 조용히 거부되는
     // 버그가 있었음 (age를 포함한 세이브 전체가 매번 통째로 거부됨)
-    const maxWeight = BASE_WEIGHT + this.stats.age * WEIGHT_PER_DAY
+    const maxWeight = maxWeightFor(this.characterType, this.stats.age, this.state.stage)
     this.stats.weight = Math.max(0, Math.min(maxWeight, value))
   }
 
@@ -550,10 +557,11 @@ function rand(min: number, max: number) {
   return min + Math.random() * (max - min)
 }
 
-// [fromEpoch, toEpoch) 구간에서 심야 시간대(로컬 기준 NIGHT_START_HOUR~NIGHT_END_HOUR)를
+// [fromEpoch, toEpoch) 구간에서 심야 시간대(로컬 기준 NIGHT_START_HOUR~nightEndHour)를
 // 제외한 "활성 시간"(초). 하루 단위로 순회하며 그날의 심야 구간과 겹치는 만큼만 빼줌 —
-// 오프라인으로 며칠 지나 여러 밤을 거쳤어도 정확히 반영됨
-export function activeSecondsBetween(fromEpoch: number, toEpoch: number): number {
+// 오프라인으로 며칠 지나 여러 밤을 거쳤어도 정확히 반영됨. nightEndHour는 그 구간 전체에
+// 동일하게 적용됨(생일 당일에 딱 진화하는 경계는 고려 안 함 — age 계산과 같은 수준의 근사)
+export function activeSecondsBetween(fromEpoch: number, toEpoch: number, nightEndHour: number = NIGHT_END_HOUR_KID): number {
   if (toEpoch <= fromEpoch) return 0
   let total = 0
   let cursor = new Date(fromEpoch * 1000)
@@ -564,7 +572,7 @@ export function activeSecondsBetween(fromEpoch: number, toEpoch: number): number
     // 자정 기준 +N시간 대신 달력 시/분으로 직접 구성 — 서머타임(DST) 있는 나라에서
     // 하루가 23/25시간이 되는 날에도 시/분 표시가 어긋나지 않게 함
     const nightStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate(), NIGHT_START_HOUR).getTime() / 1000
-    const nightEnd = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate(), NIGHT_END_HOUR).getTime() / 1000
+    const nightEnd = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate(), nightEndHour).getTime() / 1000
     const nextDayStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), dayStart.getDate() + 1)
     const segStart = Math.max(dayStartSec, fromEpoch)
     const segEnd = Math.min(nextDayStart.getTime() / 1000, toEpoch)
@@ -582,7 +590,7 @@ export function activeSecondsBetween(fromEpoch: number, toEpoch: number): number
 // fromEpoch부터 "활성 시간" targetActiveSeconds만큼 지난 실제(벽시계) 시각을 찾음.
 // activeSecondsBetween과 같은 심야 구간 규칙으로, 심야는 건너뛰며 전진 — 배고픔/행복이
 // 정확히 몇 시에 0을 찍었는지(오프라인 구간 포함) 역산하는 데 사용
-function advanceByActiveSeconds(fromEpoch: number, targetActiveSeconds: number): number {
+function advanceByActiveSeconds(fromEpoch: number, targetActiveSeconds: number, nightEndHour: number = NIGHT_END_HOUR_KID): number {
   let remaining = targetActiveSeconds
   let cursor = fromEpoch
   if (remaining <= 0) return cursor
@@ -593,7 +601,7 @@ function advanceByActiveSeconds(fromEpoch: number, targetActiveSeconds: number):
     // 자정 기준 +N시간 대신 달력 시/분으로 직접 구성 — DST로 하루가 23/25시간이 되는
     // 날에도 시/분 표시가 어긋나지 않게 함 (activeSecondsBetween과 동일한 방식)
     const nightStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), NIGHT_START_HOUR).getTime() / 1000
-    const nightEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), NIGHT_END_HOUR).getTime() / 1000
+    const nightEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), nightEndHour).getTime() / 1000
     const dayEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate() + 1).getTime() / 1000
 
     if (cursor < nightStart) {

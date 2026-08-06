@@ -22,12 +22,16 @@ export const DEFAULT_EVOLUTION_DAY = 5
 // 배고픔이 이미 꽉 찼어도 먹이주기를 계속 누를 수 있어서, 나이와 무관하게
 // 무한정 늘어나는 걸 막기 위한 상한선
 export const BASE_WEIGHT = 10
-export const WEIGHT_PER_DAY = 2
+export const WEIGHT_PER_DAY = 5
+
+// 방치했을 때 똥 개수가 끝없이 늘어나지 않도록 하는 상한 (화면엔 어차피 4개까지만 그려짐)
+export const MAX_POOP_COUNT = 10
 
 export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   kai: {
     displayName: 'KAI',
     evolutionDay: 5,
+    adultMaxWeight: 65.5,
     stages: [
       { folder: '/picture/exo/kai/kid',      prefix: 'kai_kid_',      fileMap: { poop: 'trash', special: 'dance' },            frameOverrides: { special: 5 }, name: 'KAI (Kid)'      },
       { folder: '/picture/exo/kai/adult',     prefix: '',              fileMap: { poop: 'trash', special: 'dance' },            frameOverrides: {},             name: 'KAI'            },
@@ -36,6 +40,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   chanyeol: {
     displayName: 'CHANYEOL',
     evolutionDay: 5,
+    adultMaxWeight: 73,
     stages: [
       { folder: '/picture/exo/chanyeol/kid',  prefix: 'chanyeol_kid_', fileMap: { poop: 'trash', special: 'ferret' },          frameOverrides: { special: 5 }, name: 'CHANYEOL (Kid)' },
       { folder: '/picture/exo/chanyeol/adult',prefix: '',              fileMap: { poop: 'trash', special: 'basketball_detail' },frameOverrides: {},             name: 'CHANYEOL'       },
@@ -44,6 +49,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   do: {
     displayName: 'D.O.',
     evolutionDay: 5,
+    adultMaxWeight: 67,
     stages: [
       { folder: '/picture/exo/do/kid',        prefix: 'do_kid_',       fileMap: { poop: 'trash', special: 'bedding' },         frameOverrides: { special: 5 }, name: 'D.O. (Kid)'     },
       { folder: '/picture/exo/do/adult',      prefix: '',              fileMap: { poop: 'trash', special: 'cooking' },         frameOverrides: {},             name: 'D.O.'           },
@@ -52,6 +58,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   ray: {
     displayName: 'LAY',
     evolutionDay: 5,
+    adultMaxWeight: 62,
     stages: [
       { folder: '/picture/exo/ray/kid',       prefix: 'ray_kid_',      fileMap: { poop: 'trash', special: 'dance2' },          frameOverrides: { special: 5 }, name: 'LAY (Kid)'      },
       { folder: '/picture/exo/ray/adult',     prefix: '',              fileMap: { poop: 'trash', special: 'handstand' },       frameOverrides: { special: 5 }, name: 'LAY'            },
@@ -60,6 +67,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   sehun: {
     displayName: 'SEHUN',
     evolutionDay: 5,
+    adultMaxWeight: 71,
     stages: [
       { folder: '/picture/exo/sehun/kid',     prefix: 'sehun_kid_',    fileMap: { poop: 'trash', special: 'run' },             frameOverrides: { special: 5 }, name: 'SEHUN (Kid)'    },
       { folder: '/picture/exo/sehun/adult',   prefix: '',              fileMap: { poop: 'trash', special: 'magic_walk' },      frameOverrides: {},             name: 'SEHUN'          },
@@ -68,6 +76,7 @@ export const CHARACTER_CONFIGS: Record<string, CharacterConfig> = {
   suho: {
     displayName: 'SUHO',
     evolutionDay: 5,
+    adultMaxWeight: 61,
     stages: [
       { folder: '/picture/exo/suho/kid',      prefix: 'suho_kid_',     fileMap: { poop: 'trash', special: 'study' },           frameOverrides: { special: 4 }, name: 'SUHO (Kid)'     },
       { folder: '/picture/exo/suho/adult',    prefix: '',              fileMap: { poop: 'trash', special: 'guitar' },          frameOverrides: {},             name: 'SUHO'           },

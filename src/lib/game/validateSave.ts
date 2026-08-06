@@ -1,9 +1,9 @@
-import { BASE_WEIGHT, WEIGHT_PER_DAY } from './config'
+import { MAX_POOP_COUNT } from './config'
 import { HUNGER_DECAY, HAP_DECAY } from './engine'
+import { stageForAge, maxWeightFor } from './character'
 import type { SaveData } from './types'
 
 const MAX_AGE_DAYS = 3650          // 10년 — 말이 안 되는 값만 걸러내는 넉넉한 상한
-const MAX_POOP_COUNT = 50
 const MAX_POOP_TIMERS = 20
 const FUTURE_TOLERANCE = 30 * 60   // 클라이언트-서버 시계 오차 허용치(초) — 실제 기기
                                     // 시계 오차로 정상 저장이 거부되는 걸 막기 위해 넉넉하게 잡음.
@@ -37,7 +37,7 @@ function isPlausibleTimestamp(v: unknown, now: number): v is number {
 //
 // skipAgeLock: 관리자 계정의 디버그 STAGE 버튼처럼, 의도적으로 나이를 앞당겨 미리보기
 // 하는 기능까지 이 검증에 막히면 안 되므로, 신뢰된 admin 요청에 한해 이 잠금을 건너뜀
-export function validateSaveData(input: unknown, existingCreatedAt?: number | null, skipAgeLock = false): SaveData | null {
+export function validateSaveData(input: unknown, characterType: string, existingCreatedAt?: number | null, skipAgeLock = false): SaveData | null {
   if (!input || typeof input !== 'object') return null
   const d = input as Record<string, unknown>
   const now = Date.now() / 1000
@@ -54,8 +54,10 @@ export function validateSaveData(input: unknown, existingCreatedAt?: number | nu
   if (typeof s.sick !== 'boolean') return null
   if (typeof s.alive !== 'boolean') return null
 
-  // 체중은 나이 기준 최대치(BASE_WEIGHT + age*WEIGHT_PER_DAY)를 넘을 수 없음 — engine.ts의 cap과 동일한 규칙
-  const maxWeight = BASE_WEIGHT + (s.age as number) * WEIGHT_PER_DAY
+  // 체중은 나이/성인 여부 기준 최대치를 넘을 수 없음 — engine.ts의 cap과 동일한 규칙
+  // (성인이면 캐릭터별 adultMaxWeight로도 추가로 막힘)
+  const stage = stageForAge(s.age as number, characterType)
+  const maxWeight = maxWeightFor(characterType, s.age as number, stage)
   if (!inRange(s.weight, 0, maxWeight)) return null
 
   if (!isPlausibleTimestamp(d.last_hunger_decay, now)) return null

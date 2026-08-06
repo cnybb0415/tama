@@ -22,6 +22,8 @@ export interface StageConfig {
 export interface CharacterConfig {
   displayName: string
   evolutionDay: number | null
+  // 성인(stage 1)일 때 체중이 여기서 더 안 늘어남 — 캐릭터별 실제 체격 반영
+  adultMaxWeight: number
   stages: StageConfig[]
 }
 

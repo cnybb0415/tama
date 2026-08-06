@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   // 스탯 값이 게임 로직상 나올 수 있는 범위인지 검증 — 안 그러면 로그인한 본인 계정으로
   // curl을 직접 쳐서 배고픔/친밀도/나이/체중/생존여부 등을 마음대로 조작할 수 있었음
-  const validated = validateSaveData(body.save, existingCreatedAt, isAdmin)
+  const validated = validateSaveData(body.save, character, existingCreatedAt, isAdmin)
   if (!validated)
     return NextResponse.json({ error: 'Invalid save data' }, { status: 400 })
 

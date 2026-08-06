@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
+import AnnouncementButton from '@/components/AnnouncementButton'
 import { useLang } from '@/hooks/useLang'
 import { setLang } from '@/lib/lang'
 import type { Lang } from '@/lib/lang'
@@ -274,6 +275,8 @@ export default function SelectClient({ username, stageByCharacter, isAdmin }: Pr
         <div style={{ position: 'absolute', bottom: '0.5%', left: 0, right: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <p style={{ fontSize: 9, color: '#fff', margin: 0, fontFamily: 'Galmuri9, sans-serif', background: 'rgba(0,0,0,0.45)', padding: '1px 8px', borderRadius: 3 }}>{t.controls}</p>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(0,0,0,0.45)', padding: '2px 10px', borderRadius: 3 }}>
+            <AnnouncementButton style={{ fontSize: 10, color: '#e5e7eb', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }} />
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
             <Link href="/feedback" style={{ fontSize: 10, color: '#e5e7eb', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }}>
               {t.feedbackLink}
             </Link>

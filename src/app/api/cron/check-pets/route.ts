@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getWebPush, toPushSubscription, type PushSubscriptionRow } from '@/lib/push'
 import { CHARACTER_CONFIGS } from '@/lib/game/config'
-import { HUNGER_DECAY, activeSecondsBetween } from '@/lib/game/engine'
+import { HUNGER_DECAY, activeSecondsBetween, nightEndHourForStage } from '@/lib/game/engine'
+import { stageForAge } from '@/lib/game/character'
 import type { SaveData } from '@/lib/game/types'
 
 export const maxDuration = 60
@@ -20,13 +21,14 @@ const SEND_CONCURRENCY = 20
 // 배고픔 추정치는 engine.ts와 동일하게 심야 시간대(활성 시간 기준)를 제외하고 계산해야
 // 함 — 안 그러면 밤 시간을 그냥 다 감소로 쳐서, 실제로는 아직 안 배고픈데도
 // "배고파요" 알림이 잘못 나가는 문제가 있었음
-function needsAttention(save: SaveData, updatedAt: string): string | null {
+function needsAttention(save: SaveData, updatedAt: string, characterType: string): string | null {
   const { stats } = save
   if (!stats.alive) return null
 
   const now = Date.now() / 1000
   const accum = save.hunger_decay_accum ?? 0
-  const totalActive = accum + activeSecondsBetween(save.last_hunger_decay, now)
+  const stage = stageForAge(stats.age, characterType)
+  const totalActive = accum + activeSecondsBetween(save.last_hunger_decay, now, nightEndHourForStage(stage))
   const ticks = Math.floor(totalActive / HUNGER_DECAY)
   const hunger = Math.max(0, stats.hunger - ticks)
 
@@ -92,7 +94,7 @@ export async function GET(req: NextRequest) {
   const needyByUser = new Map<string, { character: string; reason: string }[]>()
   for (const row of saves) {
     if (mutedByUser.get(row.user_id)?.has(row.character_type)) continue
-    const reason = needsAttention(row.save_data as SaveData, row.updated_at as string)
+    const reason = needsAttention(row.save_data as SaveData, row.updated_at as string, row.character_type as string)
     if (!reason) continue
     const list = needyByUser.get(row.user_id) ?? []
     list.push({ character: row.character_type, reason })

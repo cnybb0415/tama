@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useLang } from '@/hooks/useLang'
+import AnnouncementManager from './AnnouncementManager'
 import type { FeedbackRow } from './page'
 
 const PAGE_SIZE = 20
@@ -97,10 +98,13 @@ export default function AdminClient({ items, total }: { items: FeedbackRow[]; to
       margin: '0 auto',
       boxSizing: 'border-box',
     }}>
+      <Link href="/select" style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>
+        {t.feedbackBack}
+      </Link>
+
+      <AnnouncementManager />
+
       <div style={{ background: 'rgba(0,0,0,0.6)', borderRadius: 8, padding: 16 }}>
-        <Link href="/select" style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-          {t.feedbackBack}
-        </Link>
 
         <h1 style={{ fontSize: 13, color: '#fff', margin: '10px 0 14px' }}>{t.adminTitle} ({total_})</h1>
 
