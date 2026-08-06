@@ -272,7 +272,7 @@ export default function SelectClient({ username, stageByCharacter, isAdmin }: Pr
           />
         ))}
         {/* 로그아웃/탈퇴 — 타마고치 하단 */}
-        <div style={{ position: 'absolute', bottom: 'calc(0.5% - 9px)', left: 0, right: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <div style={{ position: 'absolute', bottom: 'calc(0.5% - 14px)', left: 0, right: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <p style={{ fontSize: 9, color: '#fff', margin: 0, fontFamily: 'Galmuri9, sans-serif', background: 'rgba(0,0,0,0.45)', padding: '1px 8px', borderRadius: 3 }}>{t.controls}</p>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(0,0,0,0.45)', padding: '2px 10px', borderRadius: 3 }}>
             <AnnouncementButton style={{ fontSize: 10, color: '#e5e7eb', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'Galmuri9, sans-serif' }} />
